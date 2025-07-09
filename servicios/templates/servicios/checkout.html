@@ -1,0 +1,540 @@
+{% extends 'servicios/public_base.html' %}
+{% load static %}
+
+{% block title %}Checkout - megadominio.co{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/fresh-start.css' %}">
+<style>
+.checkout-body {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+    min-height: 100vh;
+    position: relative;
+    padding-top: 80px;
+    padding-bottom: 80px;
+}
+
+.checkout-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 50px;
+}
+
+.checkout-header h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #ffffff 0%, #ff6600 50%, #ff8533 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 15px;
+    text-shadow: 0 0 30px rgba(255, 102, 0, 0.3);
+}
+
+.checkout-header p {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 300;
+}
+
+.checkout-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.checkout-section {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 25px;
+    padding: 40px;
+    color: white;
+    box-shadow: 0 20px 60px rgba(255, 102, 0, 0.1);
+    border: 1px solid rgba(255, 102, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.checkout-summary {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid rgba(255, 102, 0, 0.2);
+}
+
+.checkout-summary h4 {
+    color: #ff6600;
+    font-weight: 800;
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.cart-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 102, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.cart-item:hover {
+    background: rgba(255, 102, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+.cart-item .item-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #ffffff;
+    margin-bottom: 5px;
+}
+
+.cart-item .item-details {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.cart-item .item-price {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #00ff88;
+}
+
+.cart-total {
+    background: rgba(255, 102, 0, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 20px;
+    border: 2px solid rgba(255, 102, 0, 0.2);
+}
+
+.cart-total h3 {
+    color: #ff6600;
+    font-size: 1.8rem;
+    font-weight: 900;
+    text-align: center;
+    margin: 0;
+}
+
+.checkout-form {
+    margin-top: 30px;
+}
+
+.checkout-form label {
+    color: #ff6600;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.checkout-form .form-control {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 102, 0, 0.2);
+    border-radius: 12px;
+    color: white;
+    padding: 15px 20px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.checkout-form .form-control:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #ff6600;
+    box-shadow: 0 0 20px rgba(255, 102, 0, 0.3);
+    color: white;
+}
+
+.checkout-form .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.checkout-form .mb-3 {
+    margin-bottom: 25px !important;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ff6600 0%, #ff8533 100%);
+    border: none;
+    border-radius: 15px;
+    padding: 18px 40px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 15px 40px rgba(255, 102, 0, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #ff8533 0%, #ffcc33 100%);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-3px);
+    box-shadow: 0 20px 50px rgba(255, 102, 0, 0.4);
+}
+
+.btn-primary:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.checkout-info {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    color: #00ff88;
+}
+
+.checkout-info h5 {
+    color: #00ff88;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.checkout-info p {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.form-check-input {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 102, 0, 0.3);
+    border-radius: 4px;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+}
+
+.form-check-input:checked {
+    background-color: #ff6600;
+    border-color: #ff6600;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 102, 0, 0.25);
+}
+
+.form-check-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.form-check-label a {
+    color: #ffcc33;
+    text-decoration: underline;
+}
+
+.form-check-label a:hover {
+    color: #ffdd66;
+    text-decoration: none;
+}
+
+    .text-muted {
+        color: rgba(255, 255, 255, 0.6) !important;
+    }
+    
+    .invalid-feedback a {
+        color: #ffcc33 !important;
+        text-decoration: underline;
+        font-weight: 600;
+    }
+    
+    .invalid-feedback a:hover {
+        color: #ffdd66 !important;
+        text-decoration: none;
+    }
+
+@media (max-width: 768px) {
+    .checkout-header h1 {
+        font-size: 2rem;
+    }
+    
+    .checkout-section {
+        padding: 25px;
+    }
+    
+    .checkout-form .form-control {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+        padding: 15px 30px;
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-body">
+    <section class="checkout-header">
+        <h1>💳 Finalizar Compra</h1>
+        <p>Completa tus datos para procesar tu orden</p>
+    </section>
+    
+    <div class="container checkout-container">
+        <div class="checkout-section">
+            <div class="checkout-summary">
+                <h4>📋 Resumen del Carrito</h4>
+                {% if cart_items %}
+                <div class="cart-items">
+                    {% for item in cart_items %}
+                    <div class="cart-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="item-name">{{ item.service.name }}</div>
+                                <div class="item-details">
+                                    Ciclo: {{ item.billing_cycle|title }} | Cantidad: {{ item.quantity }}
+                                    {% if item.domain_name %}
+                                    <br>Dominio: {{ item.domain_name }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="item-price">{{ item.total_formatted }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="cart-total">
+                    <h3>Total: {{ cart_total_formatted }}</h3>
+                </div>
+                {% else %}
+                <div class="checkout-info">
+                    <h5>⚠️ Tu carrito está vacío</h5>
+                    <p>Agrega algunos productos antes de proceder al checkout.</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if cart_items %}
+            {% if not user.is_authenticated %}
+            <div class="checkout-info">
+                <h5>📝 Crear Cuenta</h5>
+                <p>Al completar tu compra, se creará automáticamente una cuenta en nuestra plataforma con los datos que proporciones.</p>
+                <p><strong>Recibirás tus credenciales de acceso al finalizar la compra.</strong></p>
+            </div>
+            {% endif %}
+            
+            <form method="post" class="checkout-form">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="billing_name" class="form-label">Nombre Completo *</label>
+                            <input type="text" class="form-control" id="billing_name" name="billing_name" 
+                                   value="{% if user.is_authenticated %}{{ user.first_name }} {{ user.last_name }}{% endif %}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="billing_email" class="form-label">Correo Electrónico *</label>
+                            <input type="email" class="form-control" id="billing_email" name="billing_email" 
+                                   value="{% if user.is_authenticated %}{{ user.email }}{% endif %}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   value="{% if user.is_authenticated %}{{ user.phone }}{% endif %}" 
+                                   placeholder="+57 300 123 4567">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="company" class="form-label">Empresa (Opcional)</label>
+                            <input type="text" class="form-control" id="company" name="company" 
+                                   value="{% if user.is_authenticated %}{{ user.company }}{% endif %}" 
+                                   placeholder="Nombre de tu empresa">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="billing_address" class="form-label">Dirección *</label>
+                    <input type="text" class="form-control" id="billing_address" name="billing_address" 
+                           value="{% if user.is_authenticated %}{{ user.address }}{% endif %}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Notas adicionales</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3" 
+                              placeholder="Especificaciones especiales, requisitos adicionales..."></textarea>
+                </div>
+                
+                <!-- Términos y Condiciones -->
+                <div class="mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="terms_accepted" name="terms_accepted" required>
+                        <label class="form-check-label" for="terms_accepted">
+                            <strong>Acepto los <a href="{% url 'accounts:terms_and_conditions' %}" target="_blank" class="text-warning">Términos y Condiciones</a> *</strong>
+                        </label>
+                    </div>
+                    <small class="text-muted">
+                        Al marcar esta casilla, confirmas que has leído y aceptas nuestros términos y condiciones de servicio.
+                    </small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-credit-card"></i> Confirmar Orden
+                </button>
+            </form>
+            {% else %}
+            <div class="text-center">
+                <a href="{% url 'services:home' %}" class="btn btn-primary">
+                    <i class="fas fa-shopping-cart"></i> Ver Servicios
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('billing_email');
+    const phoneInput = document.getElementById('phone');
+    const submitButton = document.querySelector('button[type="submit"]');
+    
+    let emailTimeout;
+    let phoneTimeout;
+    
+    // Función para validar email
+    function validateEmail() {
+        const email = emailInput.value.trim();
+        if (email && email.includes('@')) {
+            clearTimeout(emailTimeout);
+            emailTimeout = setTimeout(() => {
+                fetch('{% url "services:validate_user_data" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: `email=${encodeURIComponent(email)}&phone=`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.email_valid) {
+                        showError(emailInput, data.email_message);
+                    } else {
+                        clearError(emailInput);
+                    }
+                    updateSubmitButton();
+                })
+                .catch(error => {
+                    console.error('Error validando email:', error);
+                });
+            }, 500);
+        } else {
+            clearError(emailInput);
+            updateSubmitButton();
+        }
+    }
+    
+    // Función para validar teléfono
+    function validatePhone() {
+        const phone = phoneInput.value.trim();
+        if (phone && phone.length >= 7) {
+            clearTimeout(phoneTimeout);
+            phoneTimeout = setTimeout(() => {
+                fetch('{% url "services:validate_user_data" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: `email=&phone=${encodeURIComponent(phone)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.phone_valid) {
+                        showError(phoneInput, data.phone_message);
+                    } else {
+                        clearError(phoneInput);
+                    }
+                    updateSubmitButton();
+                })
+                .catch(error => {
+                    console.error('Error validando teléfono:', error);
+                });
+            }, 500);
+        } else {
+            clearError(phoneInput);
+            updateSubmitButton();
+        }
+    }
+    
+    // Función para mostrar error
+    function showError(input, message) {
+        clearError(input);
+        
+        input.style.borderColor = '#dc3545';
+        input.style.boxShadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.25)';
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'invalid-feedback d-block';
+        errorDiv.style.color = '#dc3545';
+        errorDiv.style.fontSize = '0.875rem';
+        errorDiv.style.marginTop = '0.25rem';
+        errorDiv.innerHTML = message; // Usar innerHTML para permitir enlaces HTML
+        
+        input.parentNode.appendChild(errorDiv);
+    }
+    
+    // Función para limpiar error
+    function clearError(input) {
+        input.style.borderColor = '';
+        input.style.boxShadow = '';
+        
+        const existingError = input.parentNode.querySelector('.invalid-feedback');
+        if (existingError) {
+            existingError.remove();
+        }
+    }
+    
+    // Función para actualizar estado del botón
+    function updateSubmitButton() {
+        const hasErrors = document.querySelectorAll('.invalid-feedback').length > 0;
+        submitButton.disabled = hasErrors;
+        
+        if (hasErrors) {
+            submitButton.style.opacity = '0.6';
+            submitButton.style.cursor = 'not-allowed';
+        } else {
+            submitButton.style.opacity = '1';
+            submitButton.style.cursor = 'pointer';
+        }
+    }
+    
+    // Event listeners
+    if (emailInput) {
+        emailInput.addEventListener('input', validateEmail);
+        emailInput.addEventListener('blur', validateEmail);
+    }
+    
+    if (phoneInput) {
+        phoneInput.addEventListener('input', validatePhone);
+        phoneInput.addEventListener('blur', validatePhone);
+    }
+});
+</script>
+{% endblock %} 

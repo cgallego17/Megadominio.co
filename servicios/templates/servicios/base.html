@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}megadominio.co - Soluciones Digitales Premium{% endblock %}</title>
+    
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS personalizado -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/fresh-start.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- NAVEGACIÓN -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <a href="{% url 'services:home' %}" style="text-decoration: none; color: inherit;">
+                    <span class="logo-text">megadominio<span class="logo-accent">.co</span></span>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="{% url 'services:home' %}#inicio" class="nav-link">Inicio</a></li>
+<li><a href="{% url 'services:home' %}#servicios" class="nav-link">Servicios</a></li>
+<li><a href="{% url 'services:home' %}#proyectos" class="nav-link">Proyectos</a></li>
+<li><a href="{% url 'services:home' %}#contacto" class="nav-link">Contacto</a></li>
+                <li><a href="{% url 'accounts:login' %}" class="nav-cta">Iniciar Sesión</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span class="logo-text">megadominio<span class="logo-accent">.co</span></span>
+                    </div>
+                    <p class="footer-description">
+                        Soluciones digitales premium para empresas que buscan destacar en el mundo digital.
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h4>Servicios</h4>
+                        <ul>
+                            <li><a href="{% url 'services:home' %}#servicios">Desarrollo Web</a></li>
+<li><a href="{% url 'services:home' %}#servicios">Hosting</a></li>
+<li><a href="{% url 'services:home' %}#servicios">Dominios</a></li>
+<li><a href="{% url 'services:home' %}#servicios">Ecommerce</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section">
+                        <h4>Empresa</h4>
+                        <ul>
+                            <li><a href="{% url 'services:home' %}#proyectos">Proyectos</a></li>
+<li><a href="{% url 'services:home' %}#contacto">Contacto</a></li>
+                            <li><a href="{% url 'accounts:login' %}">Panel Cliente</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section">
+                        <h4>Contacto</h4>
+                        <ul>
+                            <li><i class="fas fa-envelope"></i> info@megadominio.co</li>
+                            <li><i class="fas fa-phone"></i> +57 300 123 4567</li>
+                            <li><i class="fas fa-map-marker-alt"></i> Bogotá, Colombia</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 megadominio.co. Todos los derechos reservados.</p>
+                <div class="footer-social">
+                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript personalizado -->
+    <script src="{% static 'js/fresh-start.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

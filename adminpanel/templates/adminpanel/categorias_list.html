@@ -1,0 +1,165 @@
+{% extends 'adminpanel/dashboard.html' %}
+{% load static %}
+
+{% block title %}Categorías - Panel Admin | Megadominio{% endblock %}
+
+{% block categorias_active %}active{% endblock %}
+
+{% block content %}
+<!-- Header específico para categorías -->
+<header class="page-header">
+    <div>
+        <h1><i class="fas fa-tags"></i> Categorías de Servicios</h1>
+        <p>Organiza los servicios vendibles en categorías</p>
+    </div>
+</header>
+
+<!-- Lista de Categorías -->
+<div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-list"></i> Categorías ({{ categorias.count }})</h3>
+            </div>
+            <div class="card-body">
+                {% if categorias %}
+                    <div class="categories-grid">
+                        {% for categoria in categorias %}
+                            <div class="category-card">
+                                <div class="category-header">
+                                    <div class="category-icon">
+                                        <i class="{{ categoria.icon }}"></i>
+                                    </div>
+                                    <div class="category-info">
+                                        <h4>{{ categoria.name }}</h4>
+                                        <p>{{ categoria.description|truncatechars:80 }}</p>
+                                        <div class="category-meta">
+                                            <span class="meta-item">
+                                                <i class="fas fa-sort-numeric-up"></i> Orden: {{ categoria.order }}
+                                            </span>
+                                            <span class="meta-item">
+                                                {% if categoria.is_active %}
+                                                    <i class="fas fa-check-circle text-success"></i> Activa
+                                                {% else %}
+                                                    <i class="fas fa-times-circle text-muted"></i> Inactiva
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-tags fa-4x text-muted mb-3"></i>
+                        <h4>No hay categorías</h4>
+                        <p class="text-muted">Las categorías se gestionan desde el admin de Django</p>
+                        <a href="/admin/accounts/servicecategory/" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-external-link-alt"></i> Ir al Admin de Django
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <style>
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem 0;
+        }
+
+        .category-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 102, 0, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff6600, #e55a00);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .category-info h4 {
+            color: #fff;
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .category-info p {
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0 0 0.75rem 0;
+            line-height: 1.4;
+        }
+
+        .category-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .text-success {
+            color: #28a745 !important;
+        }
+
+        .text-muted {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #ff6600;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #e55a00;
+            transform: translateY(-2px);
+        }
+    </style>
+{% block extra_js %}{{ block.super }}{% endblock %}
+{% endblock %} 

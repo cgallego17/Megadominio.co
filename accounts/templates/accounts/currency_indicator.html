@@ -1,0 +1,50 @@
+<div class="currency-indicator">
+    <div class="currency-info">
+        <i class="fas fa-globe-americas me-2" style="color: #ff6b35;"></i>
+        <span class="currency-text">
+            {% if country_code == 'CO' %}
+                <strong>Colombia</strong> - Precios en Pesos Colombianos (COP)
+            {% else %}
+                <strong>{{ country_name|default:"Internacional" }}</strong> - Precios en Dólares USD
+            {% endif %}
+        </span>
+    </div>
+    {% if country_code == 'CO' %}
+        <div class="currency-note">
+            <small style="color: #cccccc;">
+                <i class="fas fa-info-circle me-1"></i>
+                Los precios se convierten automáticamente desde USD usando la tasa de cambio actual
+            </small>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .currency-indicator {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 140, 66, 0.05));
+        border: 1px solid rgba(255, 107, 53, 0.3);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    
+    .currency-info {
+        color: #ffffff;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .currency-text {
+        font-weight: 500;
+    }
+    
+    .currency-note {
+        margin-top: 0.5rem;
+    }
+    
+    .currency-note small {
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+</style> 

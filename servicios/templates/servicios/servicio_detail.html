@@ -1,0 +1,1334 @@
+{% extends 'servicios/public_base.html' %}
+{% load static %}
+{% load service_extras %}
+
+{% block title %}{{ servicio.nombre }} - Servicios IT Profesionales | Megadominio.co Colombia{% endblock %}
+
+{% block extra_head %}
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{{ servicio.descripcion|truncatewords:30 }} - Servicios profesionales en Colombia con soporte 24/7 y precios competitivos.">
+    <meta name="keywords" content="{{ servicio.nombre|lower }}, servicios it colombia, tecnología colombia, {% if servicio.nombre == 'Desarrollo Web' %}desarrollo web, páginas web, sitios web{% elif servicio.nombre == 'Hosting' %}hosting colombia, alojamiento web{% elif servicio.nombre == 'Dominios' %}dominios .co, registro dominios{% endif %}">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ servicio.nombre }} - Megadominio.co">
+    <meta property="og:description" content="{{ servicio.descripcion|truncatewords:25 }}">
+    <meta property="og:url" content="https://megadominio.co/servicio/{{ servicio.get_slug }}/">
+    <meta property="og:type" content="service">
+    
+    <!-- Structured Data for Service -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "{{ servicio.nombre }}",
+        "description": "{{ servicio.descripcion|truncatewords:50 }}",
+        "provider": {
+            "@type": "Organization",
+            "name": "Megadominio.co",
+            "url": "https://megadominio.co"
+        },
+        "areaServed": {
+            "@type": "Country",
+            "name": "Colombia"
+        },
+        "availableLanguage": "Spanish",
+        "category": "Technology Services",
+        "url": "https://megadominio.co/servicio/{{ servicio.get_slug }}/"
+    }
+    </script>
+    
+    <!-- Breadcrumb Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Inicio",
+                "item": "https://megadominio.co/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Servicios",
+                "item": "https://megadominio.co/#servicios"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "{{ servicio.nombre }}",
+                "item": "https://megadominio.co/servicio/{{ servicio.get_slug }}/"
+            }
+        ]
+    }
+    </script>
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- Carrito Flotante CSS -->
+<style>
+    /* Carrito Flotante */
+    .floating-cart {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+        background: linear-gradient(135deg, #ff6600, #ff8533);
+        color: white;
+        border-radius: 50px;
+        padding: 15px 20px;
+        box-shadow: 0 8px 25px rgba(255, 102, 0, 0.4);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        min-width: 120px;
+        justify-content: center;
+        border: none;
+        font-size: 1rem;
+    }
+
+    .floating-cart:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(255, 102, 0, 0.5);
+        color: white;
+        text-decoration: none;
+    }
+
+    .floating-cart .cart-icon {
+        font-size: 1.2rem;
+        position: relative;
+    }
+
+    .floating-cart .cart-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ff3333;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        min-width: 20px;
+        border: 2px solid white;
+    }
+
+    .floating-cart .cart-text {
+        font-size: 0.95rem;
+    }
+
+    .floating-cart.pulse {
+        animation: cartPulse 0.6s ease-out;
+    }
+
+    @keyframes cartPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .floating-cart {
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 15px;
+            min-width: 60px;
+        }
+        
+        .floating-cart .cart-text {
+            display: none;
+        }
+        
+        .floating-cart .cart-icon {
+            font-size: 1.4rem;
+        }
+    }
+
+    :root {
+        --primary-color: #ff6600;
+        --primary-dark: #e55a00;
+        --secondary-color: #ff8533;
+        --accent-color: #00d4ff;
+        --success-color: #00c851;
+        --warning-color: #ffbb33;
+        --dark-color: #1a1a1a;
+        --light-color: #f8f9fa;
+        --white: #ffffff;
+        --gray-100: #f8f9fa;
+        --gray-200: #e9ecef;
+        --gray-300: #dee2e6;
+        --gray-400: #ced4da;
+        --gray-500: #adb5bd;
+        --gray-600: #6c757d;
+        --gray-700: #495057;
+        --gray-800: #343a40;
+        --gray-900: #212529;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        color: var(--gray-800);
+        background: var(--white);
+        overflow-x: hidden;
+    }
+
+    /* Hero Section - Impactante */
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: var(--white);
+        padding: 8rem 0 6rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.05)" points="0,1000 1000,800 1000,1000"/><circle fill="rgba(255,255,255,0.03)" cx="200" cy="200" r="150"/><circle fill="rgba(255,255,255,0.03)" cx="800" cy="300" r="100"/></svg>') no-repeat center;
+        background-size: cover;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 3rem;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.5;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        font-weight: 400;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 4rem;
+    }
+
+    .btn-hero {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        min-width: 200px;
+        justify-content: center;
+    }
+
+    .btn-hero-primary {
+        background: var(--white);
+        color: var(--primary-color);
+    }
+
+    .btn-hero-primary:hover {
+        background: var(--gray-100);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        color: var(--primary-dark);
+        text-decoration: none;
+    }
+
+    .btn-hero-secondary {
+        background: transparent;
+        color: var(--white);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-hero-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--white);
+        color: var(--white);
+        text-decoration: none;
+    }
+
+    .hero-stats {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        margin-top: 2rem;
+    }
+
+    .hero-stat {
+        text-align: center;
+    }
+
+    .hero-stat-number {
+        display: block;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--white);
+        line-height: 1;
+    }
+
+    .hero-stat-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 0.5rem;
+    }
+
+    /* Pricing Section Mejorada */
+    .pricing-section {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        position: relative;
+    }
+
+    .pricing-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: linear-gradient(180deg, rgba(255, 102, 0, 0.05) 0%, transparent 100%);
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 4rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .section-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
+    }
+
+    .section-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        color: var(--gray-900);
+        margin-bottom: 1.5rem;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+    }
+
+    .section-subtitle {
+        font-size: 1.2rem;
+        color: var(--gray-600);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.5;
+    }
+
+    /* Grid de Precios Mejorado */
+    .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    /* Cards de Precios Modernas */
+    .pricing-card {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        position: relative;
+        border: 1px solid var(--gray-200);
+        height: fit-content;
+    }
+
+    .pricing-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary-color);
+    }
+
+    .pricing-card.featured {
+        transform: scale(1.05);
+        border: 2px solid var(--primary-color);
+        box-shadow: 0 15px 40px rgba(255, 102, 0, 0.2);
+        background: linear-gradient(135deg, #fff 0%, #fff8f5 100%);
+    }
+
+    .pricing-card.featured:hover {
+        transform: scale(1.05) translateY(-8px);
+    }
+
+    .pricing-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(255, 102, 0, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .pricing-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .pricing-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 1rem;
+    }
+
+    .pricing-description {
+        color: var(--gray-600);
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 2rem;
+    }
+
+    .pricing-price {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 0.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .pricing-currency {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .pricing-amount {
+        font-size: 3.5rem;
+        font-weight: 800;
+        color: var(--gray-900);
+        line-height: 1;
+    }
+
+    .pricing-period {
+        font-size: 1.1rem;
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+
+    /* Ciclos de Facturación */
+    .pricing-cycles {
+        margin-bottom: 2rem;
+    }
+
+    .pricing-cycles-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .cycles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .cycle-option {
+        background: var(--gray-100);
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+
+    .cycle-option:hover {
+        background: var(--primary-color);
+        color: var(--white);
+        transform: translateY(-2px);
+    }
+
+    .cycle-option.active {
+        background: var(--primary-color);
+        color: var(--white);
+        border-color: var(--primary-dark);
+    }
+
+    .cycle-price {
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .cycle-period {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    /* Características Mejoradas */
+    .pricing-features {
+        margin-bottom: 2.5rem;
+    }
+
+    .pricing-features-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .pricing-features-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .pricing-features-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--gray-100);
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    .pricing-features-list li:last-child {
+        border-bottom: none;
+    }
+
+    .pricing-features-list li::before {
+        content: '✓';
+        color: var(--success-color);
+        font-weight: 700;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    /* CTA Mejorado */
+    .pricing-cta {
+        text-align: center;
+    }
+
+    .btn-pricing {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1.25rem 2.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        min-width: 200px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-pricing-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: var(--white);
+        box-shadow: 0 6px 20px rgba(255, 102, 0, 0.3);
+    }
+
+    .btn-pricing-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(255, 102, 0, 0.4);
+        color: var(--white);
+        text-decoration: none;
+    }
+
+    .btn-pricing-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-pricing-primary:hover::before {
+        left: 100%;
+    }
+
+    /* Mensajes cuando no hay servicios */
+    .no-services-message {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .no-services-icon {
+        font-size: 4rem;
+        color: var(--primary-color);
+        margin-bottom: 2rem;
+    }
+
+    .no-services-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 1rem;
+    }
+
+    .no-services-description {
+        font-size: 1.1rem;
+        color: var(--gray-600);
+        line-height: 1.5;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .pricing-grid {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .pricing-card.featured {
+            transform: none;
+        }
+        
+        .pricing-card.featured:hover {
+            transform: translateY(-8px);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .hero-cta {
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .hero-stats {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+        }
+        
+        .pricing-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .pricing-card {
+            padding: 2rem;
+        }
+        
+        .cycles-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-section {
+            padding: 6rem 0 4rem;
+        }
+        
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .pricing-section {
+            padding: 4rem 0;
+        }
+        
+        .pricing-card {
+            padding: 1.5rem;
+        }
+        
+        .pricing-amount {
+            font-size: 2.5rem;
+        }
+    }
+
+    /* Animaciones adicionales */
+    .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s ease;
+    }
+
+    .animate-on-scroll.animated {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Efectos de hover mejorados */
+    .hover-lift {
+        transition: transform 0.3s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Gradientes de texto */
+    .gradient-text {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Carrito Flotante -->
+<div class="floating-cart" onclick="window.location.href='/cart/'">
+    <div class="cart-icon">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count" id="cart-counter">0</span>
+    </div>
+    <span class="cart-text">Carrito</span>
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb" style="margin-bottom: 2rem; padding: 1rem 0; color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+            <a href="{% url 'services:home' %}" style="color: rgba(255,255,255,0.8); text-decoration: none;">Inicio</a>
+            <span style="margin: 0 0.5rem;">/</span>
+            <a href="{% url 'services:home' %}#servicios" style="color: rgba(255,255,255,0.8); text-decoration: none;">Servicios</a>
+            <span style="margin: 0 0.5rem;">/</span>
+            <span style="color: white; font-weight: 600;">{{ servicio.nombre }}</span>
+        </nav>
+        
+        <div class="hero-content" itemscope itemtype="https://schema.org/Service">
+            <div class="hero-badge">
+                <i class="fas fa-star"></i> Servicio Premium
+            </div>
+            <h1 class="hero-title" itemprop="name">{{ servicio.nombre }}</h1>
+            <div class="hero-subtitle">
+                {% if servicio.nombre == "Desarrollo Web" %}
+                    Sitios web profesionales que convierten visitantes en clientes
+                {% elif servicio.nombre == "Hosting" %}
+                    Hosting rápido y seguro para tu sitio web
+                {% elif servicio.nombre == "Dominios" %}
+                    Registra tu dominio perfecto y destaca online
+                {% elif servicio.nombre == "SSL y Antivirus para Empresas" %}
+                    Protege tu sitio web con certificados SSL profesionales
+                {% elif servicio.nombre == "Correo Empresarial" %}
+                    Email profesional para impulsar tu imagen corporativa
+                {% elif servicio.nombre == "Ecommerce" %}
+                    Tiendas online que generan ventas desde el primer día
+                {% elif servicio.nombre == "Desarrollo de Software" %}
+                    Software personalizado para optimizar tu negocio
+                {% elif servicio.nombre == "Asesorías Tecnológicas" %}
+                    Consultoría tecnológica para acelerar tu crecimiento
+                {% elif servicio.nombre == "Redes y Servidores" %}
+                    Infraestructura tecnológica robusta y escalable
+                {% elif servicio.nombre == "Soluciones IoT" %}
+                    Conecta tu negocio con tecnología IoT inteligente
+                {% else %}
+                    Soluciones tecnológicas profesionales para tu empresa
+                {% endif %}
+            </div>
+            
+            <!-- SEO oculto pero funcional -->
+            <div style="display: none;" itemprop="description">{{ servicio.descripcion }}</div>
+            
+            <div class="hero-cta">
+                <a href="#planes" class="btn-hero btn-hero-primary">
+                    <i class="fas fa-rocket"></i> Ver Planes
+                </a>
+                <a href="#contacto" class="btn-hero btn-hero-secondary">
+                    <i class="fas fa-phone"></i> Hablar con Experto
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-number">{{ total_planes|default:"5" }}+</span>
+                    <span class="hero-stat-label">Planes Disponibles</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">99.9%</span>
+                    <span class="hero-stat-label">Uptime Garantizado</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">24/7</span>
+                    <span class="hero-stat-label">Soporte Técnico</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="pricing-section" id="planes">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge">Planes y Precios</div>
+            <h2 class="section-title">Elige tu Plan Perfecto</h2>
+            <p class="section-subtitle">
+                {% if total_planes %}
+                    {{ total_planes }} planes diseñados para impulsar tu negocio al siguiente nivel
+                {% else %}
+                    Planes diseñados para impulsar tu negocio al siguiente nivel
+                {% endif %}
+            </p>
+        </div>
+        
+        {% if servicios_comprables %}
+            <div class="pricing-grid">
+                {% for servicio_comprable in servicios_comprables %}
+                    <div class="pricing-card {% if servicio_comprable.is_featured %}featured{% endif %} animate-on-scroll">
+                        {% if servicio_comprable.is_featured %}
+                            <div class="pricing-badge">Más Popular</div>
+                        {% endif %}
+                        
+                        <div class="pricing-header">
+                            <h3 class="pricing-title">{{ servicio_comprable.name }}</h3>
+                            <p class="pricing-description">{{ servicio_comprable.short_description }}</p>
+                            
+                            {% if servicio_comprable.precio_principal %}
+                                <div class="pricing-price">
+                                    {% if servicio_comprable.precio_principal != "Consultar" %}
+                                        <span class="pricing-currency">$</span>
+                                        <span class="pricing-amount">{{ servicio_comprable.precio_principal|cut:"$"|cut:"COP"|cut:" "|cut:","|floatformat:0 }}</span>
+                                        <span class="pricing-period">{{ servicio_comprable.periodo_principal }}</span>
+                                    {% else %}
+                                        <span class="pricing-amount" style="font-size: 2rem;">Consultar</span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Mostrar todos los ciclos de facturación disponibles -->
+                        {% if servicio_comprable.user_prices %}
+                            <div class="pricing-cycles">
+                                <h4 class="pricing-cycles-title">Opciones de Pago</h4>
+                                <div class="cycles-grid">
+                                    {% if servicio_comprable.user_prices.monthly %}
+                                        <div class="cycle-option">
+                                            <div class="cycle-price">{{ servicio_comprable.user_prices.monthly.formatted }}</div>
+                                            <div class="cycle-period">por mes</div>
+                                        </div>
+                                    {% endif %}
+                                    {% if servicio_comprable.user_prices.quarterly %}
+                                        <div class="cycle-option">
+                                            <div class="cycle-price">{{ servicio_comprable.user_prices.quarterly.formatted }}</div>
+                                            <div class="cycle-period">por trimestre</div>
+                                        </div>
+                                    {% endif %}
+                                    {% if servicio_comprable.user_prices.annual %}
+                                        <div class="cycle-option">
+                                            <div class="cycle-price">{{ servicio_comprable.user_prices.annual.formatted }}</div>
+                                            <div class="cycle-period">por año</div>
+                                        </div>
+                                    {% endif %}
+                                    {% if servicio_comprable.user_prices.one_time %}
+                                        <div class="cycle-option">
+                                            <div class="cycle-price">{{ servicio_comprable.user_prices.one_time.formatted }}</div>
+                                            <div class="cycle-period">pago único</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if servicio_comprable.features_list %}
+                            <div class="pricing-features">
+                                <h4 class="pricing-features-title">Características Incluidas</h4>
+                                <ul class="pricing-features-list">
+                                    {% for feature in servicio_comprable.features_list %}
+                                        <li>{{ feature }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="pricing-cta">
+                            <a href="#" onclick="addToCart({{ servicio_comprable.id }})" class="btn-pricing btn-pricing-primary">
+                                <i class="fas fa-shopping-cart"></i> Agregar al Carrito
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-services-message animate-on-scroll">
+                <div class="no-services-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <h3 class="no-services-title">Planes en Preparación</h3>
+                <p class="no-services-description">
+                    Estamos preparando increíbles planes de {{ servicio.nombre }} para ti. 
+                    ¡Mantente atento a nuestras próximas actualizaciones!
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge">¿Por qué elegirnos?</div>
+            <h2 class="section-title">Beneficios que <span class="gradient-text">Transforman</span> tu Negocio</h2>
+            <p class="section-subtitle">Soluciones profesionales que generan resultados</p>
+        </div>
+        
+        <div class="features-grid">
+            {% if servicio.nombre == "Desarrollo Web" %}
+                <div class="feature-card animate-on-scroll hover-lift">
+                    <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3 class="feature-title">100% Responsivo</h3>
+                    <p class="feature-description">Diseños adaptables para móviles, tablets y desktop</p>
+                </div>
+                <div class="feature-card animate-on-scroll hover-lift">
+                    <div class="feature-icon"><i class="fas fa-search"></i></div>
+                    <h3 class="feature-title">SEO Optimizado</h3>
+                    <p class="feature-description">Posicionamiento garantizado en Google</p>
+                </div>
+                <div class="feature-card animate-on-scroll hover-lift">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <h3 class="feature-title">Carga Ultra Rápida</h3>
+                    <p class="feature-description">Sitios optimizados para velocidad máxima</p>
+                </div>
+            {% elif servicio.nombre == "Hosting" %}
+                <div class="feature-card animate-on-scroll hover-lift">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3 class="feature-title">Seguridad Máxima</h3>
+                    <p class="feature-description">SSL gratuito, firewall avanzado y monitoreo 24/7</p>
+                </div>
+                <div class="feature-card animate-on-scroll hover-lift">
+                    <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <h3 class="feature-title">Rendimiento Superior</h3>
+                    <p class="feature-description">Servidores SSD de alta velocidad y CDN global</p>
+                </div>
+                <div class="feature-card animate-on-scroll hover-lift">
+                    <div class="feature-icon"><i class="fas fa-life-ring"></i></div>
+                    <h3 class="feature-title">Soporte 24/7</h3>
+                    <p class="feature-description">Equipo de expertos disponible las 24 horas</p>
+                </div>
+            {% else %}
+                <div class="feature-card animate-on-scroll hover-lift">
+                    <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+                    <h3 class="feature-title">Implementación Rápida</h3>
+                    <p class="feature-description">Tu servicio funcionando en menos de 24 horas</p>
+                </div>
+                <div class="feature-card animate-on-scroll hover-lift">
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
+                    <h3 class="feature-title">Soporte Experto</h3>
+                    <p class="feature-description">Equipo de profesionales certificados</p>
+                </div>
+                <div class="feature-card animate-on-scroll hover-lift">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3 class="feature-title">Resultados Garantizados</h3>
+                    <p class="feature-description">Medimos y optimizamos constantemente</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge">FAQ</div>
+            <h2 class="section-title">Preguntas <span class="gradient-text">Frecuentes</span></h2>
+            <p class="section-subtitle">Resolvemos todas tus dudas sobre nuestros servicios</p>
+        </div>
+        
+        <div class="faq-container">
+            {% if servicio.nombre == "Desarrollo Web" %}
+                <div class="faq-item animate-on-scroll">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        ¿Cuánto tiempo toma desarrollar mi sitio web?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        El tiempo de desarrollo varía según la complejidad. Un sitio básico toma 1-2 semanas, mientras que proyectos complejos pueden requerir 4-8 semanas. Te proporcionamos un cronograma detallado desde el inicio.
+                    </div>
+                </div>
+                <div class="faq-item animate-on-scroll">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        ¿El sitio web será completamente responsivo?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Absolutamente. Todos nuestros sitios son 100% responsivos y se adaptan perfectamente a móviles, tablets y desktop. Utilizamos las últimas tecnologías para garantizar una experiencia óptima.
+                    </div>
+                </div>
+                <div class="faq-item animate-on-scroll">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        ¿Incluye mantenimiento y actualizaciones?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Sí, incluimos 3 meses de mantenimiento gratuito. Después ofrecemos planes de mantenimiento que incluyen actualizaciones de seguridad, copias de seguridad y soporte técnico continuo.
+                    </div>
+                </div>
+            {% elif servicio.nombre == "Hosting" %}
+                <div class="faq-item animate-on-scroll">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        ¿Qué garantías de uptime ofrecen?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Garantizamos 99.9% de uptime. Nuestros servidores están monitoreados 24/7 y tenemos sistemas de respaldo automático. Si no cumplimos, te compensamos con créditos de servicio.
+                    </div>
+                </div>
+                <div class="faq-item animate-on-scroll">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        ¿Puedo migrar mi sitio existente gratuitamente?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Sí, ofrecemos migración completamente gratuita. Nuestro equipo técnico se encarga de transferir todos tus archivos, bases de datos y configuraciones sin interrupciones.
+                    </div>
+                </div>
+                <div class="faq-item animate-on-scroll">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        ¿Incluye SSL y copias de seguridad?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Todos nuestros planes incluyen SSL gratuito y copias de seguridad diarias automáticas. También tienes acceso a un panel de control intuitivo para gestionar tu hosting.
+                    </div>
+                </div>
+            {% else %}
+                <div class="faq-item animate-on-scroll">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        ¿Cómo es el proceso de contratación?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Es muy simple: selecciona tu plan, completa el pago seguro, y nuestro equipo se contacta contigo en menos de 2 horas para comenzar inmediatamente con la implementación.
+                    </div>
+                </div>
+                <div class="faq-item animate-on-scroll">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        ¿Qué tipo de soporte técnico incluye?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Incluye soporte técnico 24/7 por chat, email y teléfono. Nuestro equipo de expertos certificados está disponible para resolver cualquier duda o problema técnico.
+                    </div>
+                </div>
+                <div class="faq-item animate-on-scroll">
+                    <button class="faq-question" onclick="toggleFAQ(this)">
+                        ¿Ofrecen garantía de satisfacción?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        Sí, ofrecemos garantía de satisfacción de 30 días. Si no estás completamente satisfecho con el servicio, te devolvemos tu dinero sin preguntas.
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2 class="cta-title">¿Listo para Transformar tu Negocio?</h2>
+            <p class="cta-subtitle">Únete a más de 500 empresas que ya han revolucionado su presencia digital con nosotros</p>
+            <div class="cta-buttons">
+                <a href="#planes" class="btn-hero btn-hero-primary">
+                    <i class="fas fa-rocket"></i> Comenzar Ahora
+                </a>
+                <a href="{% url 'services:home' %}#contacto" class="btn-hero btn-hero-secondary">
+                    <i class="fas fa-phone"></i> Hablar con Experto
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Agregar token CSRF
+    if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}';
+        document.head.appendChild(csrfInput);
+    }
+    
+    // Función para agregar al carrito
+    function addToCart(serviceId) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch('{% url "services:add_to_cart" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: `service_id=${serviceId}`
+        })
+        .then(response => {
+            if (response.ok) {
+                // Mostrar notificación de éxito moderna
+                showNotification('¡Servicio agregado al carrito exitosamente!', 'success');
+                updateCartCounter();
+                // Efecto de pulso en el carrito
+                const floatingCart = document.querySelector('.floating-cart');
+                floatingCart.classList.add('pulse');
+                setTimeout(() => floatingCart.classList.remove('pulse'), 600);
+            } else {
+                window.location.href = '/cart/';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error al agregar el servicio al carrito', 'error');
+        });
+    }
+    
+    // Función para mostrar notificaciones modernas
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        // Estilos para la notificación
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#00c851' : '#ff4444'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 10001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            font-weight: 600;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        setTimeout(() => {
+            notification.style.transform = 'translateX(400px)';
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+    
+    // Función para actualizar contador del carrito
+    function updateCartCounter() {
+        fetch('{% url "services:cart_counter" %}', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const counter = document.getElementById('cart-counter');
+            if (counter) {
+                counter.textContent = data.cart_items_count || 0;
+                
+                // Mostrar/ocultar contador según la cantidad
+                if (data.cart_items_count > 0) {
+                    counter.style.display = 'flex';
+                } else {
+                    counter.style.display = 'none';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error updating cart counter:', error);
+            // Fallback: obtener contador desde HTML
+            fetch('{% url "services:cart" %}')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const cartItems = doc.querySelectorAll('tbody tr');
+                const cartCount = cartItems.length;
+                
+                const counter = document.getElementById('cart-counter');
+                if (counter) {
+                    counter.textContent = cartCount;
+                    counter.style.display = cartCount > 0 ? 'flex' : 'none';
+                }
+            });
+        });
+    }
+    
+    // Inicializar contador del carrito al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartCounter();
+    });
+    
+    // Toggle FAQ
+    function toggleFAQ(element) {
+        const answer = element.nextElementSibling;
+        const icon = element.querySelector('.faq-icon');
+        
+        if (answer.classList.contains('active')) {
+            answer.classList.remove('active');
+            element.classList.remove('active');
+        } else {
+            // Cerrar otras FAQ abiertas
+            document.querySelectorAll('.faq-answer.active').forEach(openAnswer => {
+                openAnswer.classList.remove('active');
+                openAnswer.previousElementSibling.classList.remove('active');
+            });
+            
+            answer.classList.add('active');
+            element.classList.add('active');
+        }
+    }
+    
+    // Smooth scroll para enlaces internos
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Animaciones al hacer scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animated');
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
+    });
+    
+    // Efecto parallax suave para el hero
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const parallax = document.querySelector('.hero-section');
+        const speed = scrolled * 0.5;
+        
+        if (parallax) {
+            parallax.style.transform = `translateY(${speed}px)`;
+        }
+    });
+</script>
+{% endblock %} 

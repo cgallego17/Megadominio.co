@@ -1,0 +1,107 @@
+/* Estilos personalizados para el admin de servicios */
+
+/* Mejorar la visualización de la lista de servicios */
+.column-icono_preview {
+    text-align: center;
+    min-width: 60px;
+}
+
+.column-icono_preview i {
+    font-size: 18px !important;
+    color: #ff6600 !important;
+}
+
+.column-icono_preview img {
+    width: 24px !important;
+    height: 24px !important;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+/* Mejorar el campo de selección de iconos */
+.field-icono select {
+    font-family: 'FontAwesome', sans-serif;
+    font-size: 14px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.field-icono select option {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+/* Ayuda visual para el campo de iconos */
+.help-icon-preview {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.help-icon-preview i {
+    font-size: 24px;
+    color: #ff6600;
+}
+
+.help-icon-preview .icon-info {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* Mejorar el campo de imagen */
+.field-imagen {
+    margin-top: 20px;
+}
+
+.field-imagen .help {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+/* Estilo para el preview de imagen en el formulario */
+.current-image-preview {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.current-image-preview img {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+/* Mejorar la descripción en la lista */
+.column-descripcion_corta {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+    .column-descripcion_corta {
+        max-width: 200px;
+    }
+    
+    .column-icono_preview {
+        min-width: 40px;
+    }
+    
+    .column-icono_preview i {
+        font-size: 16px !important;
+    }
+} 

@@ -1,0 +1,366 @@
+{% extends 'adminpanel/dashboard.html' %}
+{% load static %}
+
+{% block title %}Editar Servicio | megadominio.co{% endblock %}
+
+{% block servicios_active %}active{% endblock %}
+
+{% block content %}
+<!-- Header específico para editar servicio -->
+<header class="page-header">
+    <div>
+        <div class="mobile-menu-container">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1><i class="fas fa-edit"></i> Editar Servicio</h1>
+        </div>
+        <p>Modifica la información del servicio "{{ servicio.nombre }}"</p>
+    </div>
+    <div class="header-info">
+        <div class="breadcrumb">
+            <a href="{% url 'adminpanel:admin_dashboard' %}">Dashboard</a>
+            <span>></span>
+            <a href="{% url 'adminpanel:servicios_home_list' %}">Servicios del Home</a>
+            <span>></span>
+            <span>Editar {{ servicio.nombre }}</span>
+        </div>
+    </div>
+</header>
+
+<div class="dashboard-container">
+    <div class="current-icon-preview">
+        <div class="current-icon">
+            {% if servicio.imagen %}
+                <img src="{{ servicio.imagen.url }}" alt="{{ servicio.nombre }}">
+            {% else %}
+                <i class="{{ servicio.icono }}"></i>
+            {% endif %}
+        </div>
+        <div>
+            <h3 class="service-name">{{ servicio.nombre }}</h3>
+            <div class="service-icon-name">
+                {% if servicio.imagen %}
+                    <i class="fas fa-image"></i> Imagen personalizada
+                {% else %}
+                    {{ servicio.icono }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="id_nombre" class="form-label">
+                    <i class="fas fa-tag"></i> Nombre del Servicio
+                </label>
+                <input type="text" 
+                       id="id_nombre" 
+                       name="nombre" 
+                       class="form-input" 
+                       value="{{ servicio.nombre }}"
+                       required>
+                <div class="help-text">
+                    <i class="fas fa-info-circle"></i>
+                    El icono se asignará automáticamente si no hay imagen personalizada
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_descripcion_corta" class="form-label">
+                    <i class="fas fa-align-left"></i> Descripción Corta
+                </label>
+                <textarea id="id_descripcion_corta" 
+                          name="descripcion_corta" 
+                          class="form-input form-textarea" 
+                          rows="2">{{ servicio.descripcion_corta|default:'' }}</textarea>
+                <div class="help-text">
+                    <i class="fas fa-lightbulb"></i>
+                    Una descripción breve para mostrar en listas y tarjetas
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_descripcion" class="form-label">
+                    <i class="fas fa-align-left"></i> Descripción Completa
+                </label>
+                <textarea id="id_descripcion" 
+                          name="descripcion" 
+                          class="form-input form-textarea" 
+                          required>{{ servicio.descripcion }}</textarea>
+                <div class="help-text">
+                    <i class="fas fa-lightbulb"></i>
+                    Una descripción clara ayuda a los visitantes a entender tu servicio
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_precio" class="form-label">
+                    <i class="fas fa-dollar-sign"></i> Precio (Opcional)
+                </label>
+                <input type="text" 
+                       id="id_precio" 
+                       name="precio" 
+                       class="form-input" 
+                       value="{{ servicio.precio|default:'' }}">
+                <div class="help-text">
+                    <i class="fas fa-calculator"></i>
+                    Puedes indicar precios fijos, rangos o mencionar que es bajo cotización
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_imagen" class="form-label">
+                    <i class="fas fa-image"></i> Imagen Personalizada (Opcional)
+                </label>
+                <input type="file" 
+                       id="id_imagen" 
+                       name="imagen" 
+                       class="form-input file-input" 
+                       accept="image/*">
+                {% if servicio.imagen %}
+                    <div class="help-text">
+                        <i class="fas fa-info-circle"></i>
+                        Imagen actual: {{ servicio.imagen.name }}
+                        <br>Si subes una nueva imagen, reemplazará la actual
+                    </div>
+                {% else %}
+                    <div class="help-text">
+                        <i class="fas fa-upload"></i>
+                        Si subes una imagen, se usará en lugar del icono automático
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Preview del nuevo icono -->
+            <div class="auto-icon-preview" style="display: none;">
+                <h4 style="color: var(--text-primary); margin-bottom: 1rem;">
+                    <i class="fas fa-magic"></i> Nuevo Icono Automático
+                </h4>
+                <div class="preview-container">
+                    <div class="service-icon" id="iconPreview">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-primary); font-weight: 600;" id="iconName">Servicio General</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;" id="iconClass">fas fa-cogs</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+                <a href="{% url 'adminpanel:servicios_home_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Función para asignar iconos automáticamente
+    function getAutoIcon(serviceName) {
+        const name = serviceName.toLowerCase();
+        
+        // Mapeo de palabras clave a iconos
+        const iconMap = {
+            'web': { icon: 'fas fa-globe', name: 'Páginas Web' },
+            'página': { icon: 'fas fa-globe', name: 'Páginas Web' },
+            'sitio': { icon: 'fas fa-globe', name: 'Páginas Web' },
+            'desarrollo': { icon: 'fas fa-code', name: 'Desarrollo' },
+            'programación': { icon: 'fas fa-code', name: 'Desarrollo' },
+            'código': { icon: 'fas fa-code', name: 'Desarrollo' },
+            'ecommerce': { icon: 'fas fa-shopping-cart', name: 'Ecommerce' },
+            'tienda': { icon: 'fas fa-shopping-cart', name: 'Ecommerce' },
+            'venta': { icon: 'fas fa-shopping-cart', name: 'Ecommerce' },
+            'email': { icon: 'fas fa-envelope', name: 'Email' },
+            'correo': { icon: 'fas fa-envelope', name: 'Email' },
+            'hosting': { icon: 'fas fa-server', name: 'Hosting' },
+            'servidor': { icon: 'fas fa-server', name: 'Hosting' },
+            'ssl': { icon: 'fas fa-lock', name: 'Seguridad SSL' },
+            'seguridad': { icon: 'fas fa-shield-alt', name: 'Seguridad' },
+            'wordpress': { icon: 'fab fa-wordpress', name: 'WordPress' },
+            'woocommerce': { icon: 'fab fa-woocommerce', name: 'WooCommerce' },
+            'móvil': { icon: 'fas fa-mobile-alt', name: 'Apps Móviles' },
+            'app': { icon: 'fas fa-mobile-alt', name: 'Apps Móviles' },
+            'diseño': { icon: 'fas fa-paint-brush', name: 'Diseño' },
+            'gráfico': { icon: 'fas fa-paint-brush', name: 'Diseño Gráfico' },
+            'marketing': { icon: 'fas fa-chart-line', name: 'Marketing' },
+            'seo': { icon: 'fas fa-search', name: 'SEO' },
+            'base': { icon: 'fas fa-database', name: 'Base de Datos' },
+            'datos': { icon: 'fas fa-database', name: 'Base de Datos' },
+            'cloud': { icon: 'fas fa-cloud', name: 'Cloud' },
+            'nube': { icon: 'fas fa-cloud', name: 'Cloud' },
+            'soporte': { icon: 'fas fa-headset', name: 'Soporte' },
+            'ayuda': { icon: 'fas fa-headset', name: 'Soporte' },
+            'consultoría': { icon: 'fas fa-user-tie', name: 'Consultoría' },
+            'asesoría': { icon: 'fas fa-user-tie', name: 'Asesoría' }
+        };
+        
+        // Buscar coincidencias
+        for (const [keyword, iconData] of Object.entries(iconMap)) {
+            if (name.includes(keyword)) {
+                return iconData;
+            }
+        }
+        
+        // Icono por defecto
+        return { icon: 'fas fa-cogs', name: 'Servicio General' };
+    }
+    
+    // Actualizar preview del icono cuando cambia el nombre
+    function updateIconPreview() {
+        const nombreInput = document.getElementById('id_nombre');
+        const preview = document.querySelector('.auto-icon-preview');
+        const iconPreview = document.getElementById('iconPreview');
+        const iconName = document.getElementById('iconName');
+        const iconClass = document.getElementById('iconClass');
+        
+        if (nombreInput.value.trim()) {
+            const iconData = getAutoIcon(nombreInput.value);
+            
+            // Actualizar preview
+            iconPreview.innerHTML = `<i class="${iconData.icon}"></i>`;
+            iconName.textContent = iconData.name;
+            iconClass.textContent = iconData.icon;
+            
+            // Mostrar preview
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+    
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        const nombreInput = document.getElementById('id_nombre');
+        
+        // Mostrar preview inicial si hay nombre
+        updateIconPreview();
+        
+        // Actualizar preview cuando cambia el nombre
+        nombreInput.addEventListener('input', updateIconPreview);
+        nombreInput.addEventListener('blur', updateIconPreview);
+    });
+</script>
+
+<style>
+    .current-icon-preview {
+        background: linear-gradient(135deg, var(--background-card) 0%, rgba(255, 102, 0, 0.05) 100%);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .current-icon {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        border-radius: 20px;
+        flex-shrink: 0;
+        box-shadow: 0 5px 15px rgba(255, 102, 0, 0.3);
+    }
+    
+    .current-icon i {
+        font-size: 2rem;
+        color: white;
+    }
+    
+    .current-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 20px;
+    }
+    
+    .service-name {
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .service-icon-name {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .preview-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        border: 1px solid rgba(255, 102, 0, 0.2);
+    }
+    
+    .auto-icon-preview .service-icon {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        border-radius: 15px;
+        flex-shrink: 0;
+    }
+    
+    .auto-icon-preview .service-icon i {
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .auto-icon-preview {
+        margin: 1.5rem 0;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(255, 102, 0, 0.1), rgba(255, 102, 0, 0.05));
+        border: 1px solid rgba(255, 102, 0, 0.3);
+        border-radius: 15px;
+    }
+    
+    .file-input {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px dashed var(--glass-border);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .file-input:hover {
+        border-color: var(--primary-color);
+        background: rgba(255, 102, 0, 0.05);
+    }
+    
+    @media (max-width: 768px) {
+        .current-icon-preview {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .preview-container {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}{{ block.super }}{% endblock %} 

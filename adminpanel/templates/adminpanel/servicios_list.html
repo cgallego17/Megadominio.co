@@ -1,0 +1,201 @@
+{% extends 'adminpanel/dashboard.html' %}
+{% load static %}
+
+{% block title %}Gestionar Servicios | megadominio.co{% endblock %}
+
+{% block servicios_active %}active{% endblock %}
+
+{% block content %}
+<!-- Header específico para servicios -->
+<header class="page-header">
+    <div>
+        <div class="mobile-menu-container">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1><i class="fas fa-cogs"></i> Gestionar Servicios</h1>
+        </div>
+        <p>Administra los servicios ofrecidos por tu empresa</p>
+    </div>
+    <div class="header-info">
+        <a href="{% url 'adminpanel:servicio_create' %}" class="btn">
+            <i class="fas fa-plus"></i> Crear Servicio
+        </a>
+        <div class="breadcrumb">
+            <a href="{% url 'adminpanel:admin_dashboard' %}">Dashboard</a>
+            <span>></span>
+            <span>Servicios</span>
+        </div>
+    </div>
+</header>
+
+<div class="dashboard-container">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="message {{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Estadísticas rápidas -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card primary">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ servicios.count }}</div>
+                            <div class="stat-label">Servicios Totales</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-cogs"></i> Catálogo completo
+                            </div>
+                        </div>
+                        <div class="stat-icon primary">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card success">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ servicios_con_imagen.count }}</div>
+                            <div class="stat-label">Con Imagen</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-image"></i> Visual atractivo
+                            </div>
+                        </div>
+                        <div class="stat-icon success">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card info">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ servicios_con_precio.count }}</div>
+                            <div class="stat-label">Con Precio</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-dollar-sign"></i> Información comercial
+                            </div>
+                        </div>
+                        <div class="stat-icon info">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if servicios %}
+                <div class="services-grid">
+                    {% for servicio in servicios %}
+                        <div class="service-card">
+                            <div class="service-header">
+                                <div class="service-icon">
+                                    {% if servicio.imagen %}
+                                        <img src="{{ servicio.imagen.url }}" alt="{{ servicio.nombre }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 15px;">
+                                    {% else %}
+                                        <i class="{{ servicio.icono }}"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="service-info">
+                                    <h3>{{ servicio.nombre }}</h3>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                        {% if servicio.imagen %}
+                                            <i class="fas fa-image"></i> Imagen personalizada
+                                        {% else %}
+                                            <i class="{{ servicio.icono }}"></i> {{ servicio.icono }}
+                                        {% endif %}
+                                    </div>
+                                    {% if servicio.precio %}
+                                        <div style="color: var(--primary-color); font-weight: 600; font-size: 1.1rem;">
+                                            <i class="fas fa-tag"></i> {{ servicio.precio }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="service-description">
+                                {{ servicio.descripcion|truncatewords:20 }}
+                            </div>
+                            
+                            <div class="service-actions">
+                                <a href="{% url 'adminpanel:servicio_edit' servicio.id %}" class="btn btn-small">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="{% url 'adminpanel:servicio_delete' servicio.id %}" class="btn btn-small btn-danger">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-cogs"></i>
+                    <h3>No hay servicios configurados</h3>
+                    <p>Crea tu primer servicio para empezar a mostrar tus ofertas</p>
+                    <a href="{% url 'adminpanel:servicio_create' %}" class="btn" style="margin-top: 1rem;">
+                        <i class="fas fa-plus"></i> Crear Primer Servicio
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+    
+    <script>
+        // Toggle sidebar
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        }
+        
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+        
+        // Close mobile menu
+        function closeMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+    </script>
+    
+    <style>
+        .stat-card .stat-number {
+            font-size: 2rem;
+        }
+        
+        .service-card {
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        .service-card:nth-child(1) { animation-delay: 0.1s; }
+        .service-card:nth-child(2) { animation-delay: 0.2s; }
+        .service-card:nth-child(3) { animation-delay: 0.3s; }
+        .service-card:nth-child(4) { animation-delay: 0.4s; }
+        .service-card:nth-child(5) { animation-delay: 0.5s; }
+        .service-card:nth-child(6) { animation-delay: 0.6s; }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+{% endblock %} 
+{% block extra_js %}{{ block.super }}{% endblock %} 

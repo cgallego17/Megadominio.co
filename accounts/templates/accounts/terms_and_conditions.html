@@ -1,0 +1,518 @@
+{% extends 'accounts/client_base.html' %}
+{% load static %}
+
+{% block title %}Términos y Condiciones - Megadominio.co{% endblock %}
+
+{% block extra_css %}
+<style>
+    .terms-container {
+        max-width: 900px;
+        margin: 0 auto;
+        line-height: 1.8;
+    }
+    
+    .terms-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background-color: #2d2d2d;
+        border-radius: 10px;
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .terms-section h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    .terms-section h4 {
+        color: #ffffff;
+        margin-top: 1.5rem;
+        margin-bottom: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .terms-section p {
+        color: #cccccc;
+        margin-bottom: 1rem;
+        text-align: justify;
+    }
+    
+    .terms-section ul {
+        color: #cccccc;
+        padding-left: 1.5rem;
+    }
+    
+    .terms-section li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .highlight-box {
+        background-color: rgba(255, 107, 53, 0.1);
+        border: 1px solid var(--primary-color);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .contact-info {
+        background-color: #404040;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .last-updated {
+        text-align: center;
+        font-style: italic;
+        color: #888;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #444;
+    }
+    
+    .table-of-contents {
+        background-color: #404040;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .table-of-contents ul {
+        list-style: none;
+        padding-left: 0;
+    }
+    
+    .table-of-contents li {
+        padding: 0.3rem 0;
+    }
+    
+    .table-of-contents a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .table-of-contents a:hover {
+        color: #ff8c42;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="terms-container">
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="text-white mb-3">
+                <i class="fas fa-file-contract me-3"></i>
+                Términos y Condiciones
+            </h1>
+            <p class="text-muted fs-5">
+                Megadominio.co - Servicios de Hosting y Desarrollo Web
+            </p>
+        </div>
+
+        <!-- Tabla de Contenidos -->
+        <div class="table-of-contents">
+            <h4 class="text-white mb-3">
+                <i class="fas fa-list me-2"></i>
+                Tabla de Contenidos
+            </h4>
+            <ul>
+                <li><a href="#section-1">1. Aceptación de los Términos</a></li>
+                <li><a href="#section-2">2. Definiciones</a></li>
+                <li><a href="#section-3">3. Servicios Ofrecidos</a></li>
+                <li><a href="#section-4">4. Registro y Cuenta de Usuario</a></li>
+                <li><a href="#section-5">5. Pagos y Facturación</a></li>
+                <li><a href="#section-6">6. Política de Reembolsos</a></li>
+                <li><a href="#section-7">7. Uso Aceptable</a></li>
+                <li><a href="#section-8">8. Propiedad Intelectual</a></li>
+                <li><a href="#section-9">9. Limitación de Responsabilidad</a></li>
+                <li><a href="#section-10">10. Terminación del Servicio</a></li>
+                <li><a href="#section-11">11. Protección de Datos</a></li>
+                <li><a href="#section-12">12. Modificaciones</a></li>
+                <li><a href="#section-13">13. Ley Aplicable</a></li>
+                <li><a href="#section-14">14. Contacto</a></li>
+            </ul>
+        </div>
+
+        <!-- Sección 1: Aceptación -->
+        <div class="terms-section" id="section-1">
+            <h3>1. Aceptación de los Términos</h3>
+            <p>
+                Al acceder y utilizar los servicios de Megadominio.co, usted acepta estar sujeto a estos términos y condiciones de uso. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar nuestros servicios.
+            </p>
+            <div class="highlight-box">
+                <strong class="text-warning">Importante:</strong> El uso continuado de nuestros servicios constituye la aceptación de estos términos y cualquier modificación posterior.
+            </div>
+        </div>
+
+        <!-- Sección 2: Definiciones -->
+        <div class="terms-section" id="section-2">
+            <h3>2. Definiciones</h3>
+            <ul>
+                <li><strong>"Megadominio.co"</strong> o <strong>"nosotros"</strong>: Se refiere a la empresa proveedora de servicios de hosting y desarrollo web.</li>
+                <li><strong>"Cliente"</strong> o <strong>"usted"</strong>: Persona física o jurídica que contrata nuestros servicios.</li>
+                <li><strong>"Servicios"</strong>: Todos los productos y servicios ofrecidos por Megadominio.co, incluyendo hosting, desarrollo web, correo corporativo, certificados SSL, entre otros.</li>
+                <li><strong>"Cuenta"</strong>: El perfil de usuario creado para acceder a nuestros servicios.</li>
+                <li><strong>"Contenido"</strong>: Cualquier información, datos, texto, software, música, sonido, fotografías, gráficos, video, mensajes u otros materiales.</li>
+            </ul>
+        </div>
+
+        <!-- Sección 3: Servicios -->
+        <div class="terms-section" id="section-3">
+            <h3>3. Servicios Ofrecidos</h3>
+            <h4>3.1 Servicios de Hosting</h4>
+            <p>
+                Ofrecemos servicios de alojamiento web con diferentes planes y características. Todos nuestros planes incluyen:
+            </p>
+            <ul>
+                <li>Espacio en disco según el plan contratado</li>
+                <li>Transferencia de datos mensual</li>
+                <li>Soporte técnico especializado</li>
+                <li>Panel de control cPanel</li>
+                <li>Copias de seguridad regulares</li>
+            </ul>
+
+            <h4>3.2 Desarrollo Web</h4>
+            <p>
+                Proporcionamos servicios de desarrollo web personalizado, incluyendo:
+            </p>
+            <ul>
+                <li>Diseño y desarrollo de sitios web</li>
+                <li>Aplicaciones web a medida</li>
+                <li>Mantenimiento y actualizaciones</li>
+                <li>Optimización SEO</li>
+                <li>Integración de sistemas de pago</li>
+            </ul>
+
+            <h4>3.3 Servicios Adicionales</h4>
+            <ul>
+                <li>Correo corporativo</li>
+                <li>Certificados SSL</li>
+                <li>Registro de dominios</li>
+                <li>Servicios de marketing digital</li>
+                <li>Soporte técnico especializado</li>
+            </ul>
+        </div>
+
+        <!-- Sección 4: Registro -->
+        <div class="terms-section" id="section-4">
+            <h3>4. Registro y Cuenta de Usuario</h3>
+            <h4>4.1 Creación de Cuenta</h4>
+            <p>
+                Para utilizar nuestros servicios, debe crear una cuenta proporcionando información precisa y completa. Es su responsabilidad mantener actualizada esta información.
+            </p>
+
+            <h4>4.2 Seguridad de la Cuenta</h4>
+            <p>
+                Usted es responsable de:
+            </p>
+            <ul>
+                <li>Mantener la confidencialidad de sus credenciales de acceso</li>
+                <li>Todas las actividades que ocurran bajo su cuenta</li>
+                <li>Notificar inmediatamente cualquier uso no autorizado</li>
+                <li>Utilizar contraseñas seguras</li>
+            </ul>
+
+            <h4>4.3 Verificación de Identidad</h4>
+            <p>
+                Nos reservamos el derecho de solicitar verificación de identidad antes de activar ciertos servicios o procesar pagos.
+            </p>
+        </div>
+
+        <!-- Sección 5: Pagos -->
+        <div class="terms-section" id="section-5">
+            <h3>5. Pagos y Facturación</h3>
+            <h4>5.1 Métodos de Pago</h4>
+            <p>
+                Aceptamos pagos seguros a través de Wompi, incluyendo:
+            </p>
+            <ul>
+                <li>Tarjetas de crédito y débito (Visa, Mastercard, American Express)</li>
+                <li>PSE (Pagos Seguros en Línea)</li>
+                <li>Nequi</li>
+            </ul>
+
+            <h4>5.2 Facturación</h4>
+            <p>
+                Los servicios se facturan según el ciclo seleccionado (mensual, trimestral, anual). El pago debe realizarse por adelantado antes de la activación del servicio.
+            </p>
+
+            <h4>5.3 Renovaciones</h4>
+            <p>
+                Los servicios se renuevan automáticamente al final de cada período de facturación, a menos que se cancelen con al menos 7 días de anticipación.
+            </p>
+
+            <h4>5.4 Impuestos</h4>
+            <p>
+                Los precios mostrados pueden no incluir impuestos aplicables según la legislación vigente.
+            </p>
+        </div>
+
+        <!-- Sección 6: Reembolsos -->
+        <div class="terms-section" id="section-6">
+            <h3>6. Política de Reembolsos</h3>
+            <h4>6.1 Garantía de Satisfacción</h4>
+            <p>
+                Ofrecemos una garantía de satisfacción de 30 días para servicios de hosting. Si no está satisfecho, puede solicitar un reembolso completo dentro de los primeros 30 días.
+            </p>
+
+            <h4>6.2 Exclusiones</h4>
+            <p>
+                Los siguientes servicios no son elegibles para reembolso:
+            </p>
+            <ul>
+                <li>Registro de dominios</li>
+                <li>Certificados SSL</li>
+                <li>Servicios de desarrollo web personalizados</li>
+                <li>Servicios adicionales de terceros</li>
+            </ul>
+
+            <h4>6.3 Proceso de Reembolso</h4>
+            <p>
+                Para solicitar un reembolso, contacte nuestro soporte técnico. Los reembolsos se procesan en 5-10 días hábiles.
+            </p>
+        </div>
+
+        <!-- Sección 7: Uso Aceptable -->
+        <div class="terms-section" id="section-7">
+            <h3>7. Política de Uso Aceptable</h3>
+            <h4>7.1 Usos Prohibidos</h4>
+            <p>
+                Está prohibido utilizar nuestros servicios para:
+            </p>
+            <ul>
+                <li>Actividades ilegales o que violen leyes locales, nacionales o internacionales</li>
+                <li>Envío de spam o correos electrónicos no solicitados</li>
+                <li>Distribución de malware, virus o código malicioso</li>
+                <li>Actividades que consuman recursos excesivos del servidor</li>
+                <li>Contenido pornográfico, violento o que incite al odio</li>
+                <li>Violación de derechos de propiedad intelectual</li>
+                <li>Phishing o suplantación de identidad</li>
+            </ul>
+
+            <h4>7.2 Consecuencias</h4>
+            <p>
+                El incumplimiento de esta política puede resultar en:
+            </p>
+            <ul>
+                <li>Suspensión temporal del servicio</li>
+                <li>Terminación permanente de la cuenta</li>
+                <li>Acciones legales cuando corresponda</li>
+            </ul>
+        </div>
+
+        <!-- Sección 8: Propiedad Intelectual -->
+        <div class="terms-section" id="section-8">
+            <h3>8. Propiedad Intelectual</h3>
+            <h4>8.1 Derechos de Megadominio.co</h4>
+            <p>
+                Todos los derechos de propiedad intelectual sobre nuestros servicios, software, diseños y contenido son propiedad de Megadominio.co.
+            </p>
+
+            <h4>8.2 Derechos del Cliente</h4>
+            <p>
+                Usted mantiene todos los derechos sobre el contenido que carga a nuestros servidores, pero nos otorga una licencia para almacenarlo y distribuirlo según sea necesario para prestar el servicio.
+            </p>
+
+            <h4>8.3 Respeto por Derechos de Terceros</h4>
+            <p>
+                Usted se compromete a no violar derechos de propiedad intelectual de terceros y a obtener todas las licencias necesarias para el contenido que utilice.
+            </p>
+        </div>
+
+        <!-- Sección 9: Limitación de Responsabilidad -->
+        <div class="terms-section" id="section-9">
+            <h3>9. Limitación de Responsabilidad</h3>
+            <h4>9.1 Disponibilidad del Servicio</h4>
+            <p>
+                Aunque nos esforzamos por mantener un uptime del 99.9%, no garantizamos disponibilidad continua del servicio debido a mantenimientos, actualizaciones o circunstancias fuera de nuestro control.
+            </p>
+
+            <h4>9.2 Limitación de Daños</h4>
+            <p>
+                Nuestra responsabilidad total hacia usted no excederá el monto pagado por el servicio en los últimos 12 meses. No seremos responsables por daños indirectos, incidentales o consecuenciales.
+            </p>
+
+            <h4>9.3 Copias de Seguridad</h4>
+            <p>
+                Aunque realizamos copias de seguridad regulares, es su responsabilidad mantener copias de seguridad independientes de su contenido crítico.
+            </p>
+        </div>
+
+        <!-- Sección 10: Terminación -->
+        <div class="terms-section" id="section-10">
+            <h3>10. Terminación del Servicio</h3>
+            <h4>10.1 Terminación por el Cliente</h4>
+            <p>
+                Puede cancelar sus servicios en cualquier momento a través de su panel de control o contactando nuestro soporte.
+            </p>
+
+            <h4>10.2 Terminación por Megadominio.co</h4>
+            <p>
+                Podemos terminar su servicio en caso de:
+            </p>
+            <ul>
+                <li>Violación de estos términos</li>
+                <li>Falta de pago</li>
+                <li>Uso abusivo de recursos</li>
+                <li>Actividades ilegales</li>
+            </ul>
+
+            <h4>10.3 Efectos de la Terminación</h4>
+            <p>
+                Al terminar el servicio, se eliminará todo el contenido después de un período de gracia de 30 días.
+            </p>
+        </div>
+
+        <!-- Sección 11: Protección de Datos -->
+        <div class="terms-section" id="section-11">
+            <h3>11. Protección de Datos y Privacidad</h3>
+            <h4>11.1 Recopilación de Datos</h4>
+            <p>
+                Recopilamos únicamente los datos necesarios para prestar nuestros servicios, incluyendo información de contacto, facturación y uso del servicio.
+            </p>
+
+            <h4>11.2 Uso de Datos</h4>
+            <p>
+                Sus datos se utilizan para:
+            </p>
+            <ul>
+                <li>Prestación y mejora de servicios</li>
+                <li>Comunicación relacionada con el servicio</li>
+                <li>Cumplimiento de obligaciones legales</li>
+                <li>Prevención de fraude</li>
+            </ul>
+
+            <h4>11.3 Protección de Datos</h4>
+            <p>
+                Implementamos medidas de seguridad técnicas y organizativas para proteger sus datos personales contra acceso no autorizado, pérdida o destrucción.
+            </p>
+        </div>
+
+        <!-- Sección 12: Modificaciones -->
+        <div class="terms-section" id="section-12">
+            <h3>12. Modificaciones de los Términos</h3>
+            <p>
+                Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor 30 días después de su publicación. El uso continuado de nuestros servicios constituye la aceptación de los términos modificados.
+            </p>
+            <div class="highlight-box">
+                <strong class="text-info">Notificación:</strong> Le notificaremos sobre cambios importantes a través de email o notificaciones en su panel de control.
+            </div>
+        </div>
+
+        <!-- Sección 13: Ley Aplicable -->
+        <div class="terms-section" id="section-13">
+            <h3>13. Ley Aplicable y Jurisdicción</h3>
+            <p>
+                Estos términos se rigen por las leyes de la República de Colombia. Cualquier disputa será resuelta en los tribunales competentes de Colombia.
+            </p>
+            <h4>13.1 Resolución de Disputas</h4>
+            <p>
+                Antes de iniciar acciones legales, las partes intentarán resolver cualquier disputa a través de negociación directa o mediación.
+            </p>
+        </div>
+
+        <!-- Sección 14: Contacto -->
+        <div class="terms-section" id="section-14">
+            <h3>14. Información de Contacto</h3>
+            <div class="contact-info">
+                <h4 class="text-white mb-3">
+                    <i class="fas fa-envelope me-2"></i>
+                    ¿Preguntas sobre estos términos?
+                </h4>
+                <p class="text-muted mb-2">
+                    Si tiene preguntas sobre estos términos y condiciones, puede contactarnos:
+                </p>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-envelope me-2 text-orange"></i>
+                        <strong>Email:</strong> legal@megadominio.co
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-phone me-2 text-orange"></i>
+                        <strong>Teléfono:</strong> +57 (1) 234-5678
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-map-marker-alt me-2 text-orange"></i>
+                        <strong>Dirección:</strong> Bogotá, Colombia
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-clock me-2 text-orange"></i>
+                        <strong>Horario:</strong> Lunes a Viernes, 8:00 AM - 6:00 PM (COT)
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Fecha de última actualización -->
+        <div class="last-updated">
+            <p>
+                <i class="fas fa-calendar-alt me-2"></i>
+                Última actualización: 4 de julio de 2025
+            </p>
+            <p>
+                Versión 1.0
+            </p>
+        </div>
+
+        <!-- Botón de regreso -->
+        <div class="text-center mt-4">
+            <a href="javascript:history.back()" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver
+            </a>
+            <a href="{% url 'services:home' %}" class="btn btn-primary ms-3">
+                <i class="fas fa-shopping-cart me-2"></i>
+                Ver Servicios
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scrolling para enlaces internos
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Resaltar sección actual al hacer scroll
+    const sections = document.querySelectorAll('.terms-section');
+    const navLinks = document.querySelectorAll('.table-of-contents a');
+
+    function highlightCurrentSection() {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (window.pageYOffset >= sectionTop - 100) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.style.fontWeight = 'normal';
+            if (link.getAttribute('href') === '#' + current) {
+                link.style.fontWeight = 'bold';
+            }
+        });
+    }
+
+    window.addEventListener('scroll', highlightCurrentSection);
+});
+</script>
+{% endblock %} 

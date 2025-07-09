@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación 2FA | megadominio.co</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff6600;
+            --primary-dark: #e55a00;
+            --secondary-color: #0a0a0a;
+            --accent-color: #ffffff;
+            --text-light: #cccccc;
+            --text-dark: #333333;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .bg-shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, var(--primary-color), transparent);
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .bg-shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, var(--primary-color), transparent);
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .verify-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow);
+            position: relative;
+            z-index: 2;
+            animation: slideIn 0.8s ease-out;
+            text-align: center;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .verify-header {
+            margin-bottom: 2.5rem;
+        }
+
+        .verify-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(255, 102, 0, 0.3);
+        }
+
+        .verify-logo i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .verify-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .verify-subtitle {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+        }
+
+        .user-email {
+            background: rgba(255, 102, 0, 0.1);
+            border: 1px solid rgba(255, 102, 0, 0.3);
+            color: var(--primary-color);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--accent-color);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 0.5rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .code-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: normal;
+        }
+
+        .verify-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
+            margin-bottom: 1rem;
+        }
+
+        .verify-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 102, 0, 0.4);
+        }
+
+        .resend-button {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .resend-button:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .alert-error {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: #ff6b6b;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            color: #28a745;
+        }
+
+        .timer {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 1.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .verify-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+            
+            .verify-title {
+                font-size: 1.5rem;
+            }
+            
+            .verify-logo {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .verify-logo i {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animación de fondo -->
+    <div class="bg-animation">
+        <div class="bg-shape"></div>
+        <div class="bg-shape"></div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="verify-container">
+        <div class="verify-header">
+            <div class="verify-logo">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1 class="verify-title">Verificación 2FA</h1>
+            <p class="verify-subtitle">Hemos enviado un código de verificación a tu correo electrónico</p>
+            <div class="user-email">
+                <i class="fas fa-envelope"></i> {{ user.email }}
+            </div>
+        </div>
+
+        <!-- Mensajes -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fas fa-{% if message.tags == 'error' %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" id="verifyForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="code" class="form-label">Código de 6 dígitos</label>
+                <input type="text" 
+                       id="code" 
+                       name="code" 
+                       class="code-input" 
+                       placeholder="000000"
+                       maxlength="6"
+                       pattern="[0-9]{6}"
+                       required
+                       autocomplete="one-time-code">
+            </div>
+            
+            <button type="submit" class="verify-button">
+                <i class="fas fa-check"></i>
+                Verificar Código
+            </button>
+        </form>
+
+        <button type="button" class="resend-button" onclick="resendCode()">
+            <i class="fas fa-redo"></i>
+            Reenviar Código
+        </button>
+
+        <div class="timer" id="timer">
+            El código expira en 10 minutos
+        </div>
+
+        <a href="{% url 'login' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Volver al login
+        </a>
+    </div>
+
+    <script>
+        // Auto-focus en el input del código
+        document.getElementById('code').focus();
+
+        // Formatear input del código
+        document.getElementById('code').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+        });
+
+        // Función para reenviar código
+        function resendCode() {
+            const button = document.querySelector('.resend-button');
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            button.disabled = true;
+            
+            fetch('{% url "resend_2fa" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar mensaje de éxito
+                    const messagesDiv = document.querySelector('.messages') || document.createElement('div');
+                    messagesDiv.className = 'messages';
+                    messagesDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            ${data.message}
+                        </div>
+                    `;
+                    document.querySelector('.verify-header').after(messagesDiv);
+                } else {
+                    // Mostrar mensaje de error
+                    const messagesDiv = document.querySelector('.messages') || document.createElement('div');
+                    messagesDiv.className = 'messages';
+                    messagesDiv.innerHTML = `
+                        <div class="alert alert-error">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            ${data.message}
+                        </div>
+                    `;
+                    document.querySelector('.verify-header').after(messagesDiv);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        // Timer de expiración (10 minutos)
+        let timeLeft = 600; // 10 minutos en segundos
+        const timerElement = document.getElementById('timer');
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            
+            if (timeLeft > 0) {
+                timerElement.textContent = `El código expira en ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+            } else {
+                timerElement.textContent = 'El código ha expirado';
+                timerElement.style.color = '#ff6b6b';
+            }
+        }
+
+        // Actualizar timer cada segundo
+        setInterval(updateTimer, 1000);
+        updateTimer(); // Ejecutar inmediatamente
+    </script>
+</body>
+</html> 

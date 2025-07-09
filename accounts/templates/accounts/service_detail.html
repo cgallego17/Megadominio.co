@@ -1,0 +1,217 @@
+{% extends 'accounts/client_base.html' %}
+
+{% block title %}{{ service.name }} - Megadominio{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'accounts:client_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'accounts:client_services' %}">Servicios</a></li>
+            <li class="breadcrumb-item active">{{ service.name }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Service Header -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center mb-3">
+                <div class="me-3">
+                    {% if service.service_type == 'hosting' %}
+                        <i class="fas fa-server fa-2x text-primary"></i>
+                    {% elif service.service_type == 'domain' %}
+                        <i class="fas fa-globe fa-2x text-primary"></i>
+                    {% elif service.service_type == 'email' %}
+                        <i class="fas fa-envelope fa-2x text-primary"></i>
+                    {% elif service.service_type == 'ssl' %}
+                        <i class="fas fa-shield-alt fa-2x text-primary"></i>
+                    {% else %}
+                        <i class="fas fa-cog fa-2x text-primary"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <h1 class="h3 mb-1">{{ service.name }}</h1>
+                    <p class="text-muted mb-0">{{ service.get_service_type_display }}</p>
+                    {% if service.domain_name %}
+                        <small class="text-muted">{{ service.domain_name }}</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <div class="mb-2">
+                {% if service.status == 'active' %}
+                    <span class="badge bg-success fs-6">Activo</span>
+                {% elif service.status == 'expired' %}
+                    <span class="badge bg-danger fs-6">Vencido</span>
+                {% elif service.status == 'suspended' %}
+                    <span class="badge bg-warning fs-6">Suspendido</span>
+                {% else %}
+                    <span class="badge bg-secondary fs-6">{{ service.get_status_display }}</span>
+                {% endif %}
+            </div>
+            <div class="text-muted">
+                <small>ID del Servicio: #{{ service.id }}</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Service Details -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Información del Servicio</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Tipo:</strong> {{ service.get_service_type_display }}</p>
+                    <p><strong>Estado:</strong> {{ service.get_status_display }}</p>
+                    <p><strong>Precio:</strong> ${{ service.price }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Inicio:</strong> {{ service.start_date|date:"d/m/Y" }}</p>
+                    <p><strong>Vencimiento:</strong> {{ service.expiry_date|date:"d/m/Y" }}</p>
+                    <p><strong>Días restantes:</strong> {{ service.days_until_expiry }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Technical Details -->
+    {% if service.domain_name or service.server_ip or service.cpanel_username %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Detalles Técnicos
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if service.domain_name %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><strong>Dominio:</strong></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="{{ service.domain_name }}" readonly>
+                                <button class="btn btn-outline-secondary" type="button" 
+                                        onclick="copyToClipboard('{{ service.domain_name }}')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if service.server_ip %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><strong>IP del Servidor:</strong></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="{{ service.server_ip }}" readonly>
+                                <button class="btn btn-outline-secondary" type="button" 
+                                        onclick="copyToClipboard('{{ service.server_ip }}')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if service.cpanel_username %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><strong>Usuario cPanel:</strong></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="{{ service.cpanel_username }}" readonly>
+                                <button class="btn btn-outline-secondary" type="button" 
+                                        onclick="copyToClipboard('{{ service.cpanel_username }}')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Email Accounts -->
+    {% if email_accounts %}
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-envelope me-2"></i>
+                    Cuentas de Email ({{ email_accounts.count }})
+                </h5>
+
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Cuota</th>
+                                <th>Uso</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for email in email_accounts %}
+                                <tr>
+                                    <td>{{ email.email_address }}</td>
+                                    <td>{{ email.quota_mb }} MB</td>
+                                    <td>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar bg-primary" 
+                                                 style="width: {{ email.usage_percentage }}%"></div>
+                                        </div>
+                                        <small>{{ email.usage_percentage|floatformat:1 }}%</small>
+                                    </td>
+                                    <td>
+                                        {% if email.is_active %}
+                                            <span class="badge bg-success">Activa</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactiva</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Mostrar mensaje de éxito
+            const toast = document.createElement('div');
+            toast.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toast.innerHTML = `
+                <div class="toast show" role="alert">
+                    <div class="toast-header">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong class="me-auto">Copiado</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        Texto copiado al portapapeles
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            // Remover el toast después de 3 segundos
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }).catch(function(err) {
+            console.error('Error al copiar: ', err);
+            alert('Error al copiar al portapapeles');
+        });
+    }
+</script>
+{% endblock %} 

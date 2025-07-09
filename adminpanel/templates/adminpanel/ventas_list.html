@@ -1,0 +1,473 @@
+{% extends 'adminpanel/dashboard.html' %}
+{% load static %}
+
+{% block title %}Gestionar Ventas | megadominio.co{% endblock %}
+
+{% block dashboard_active %}{% endblock %}
+{% block ventas_active %}active{% endblock %}
+
+{% block page_header %}
+<header class="page-header">
+    <div>
+        <h1><i class="fas fa-dollar-sign"></i> Gestionar Ventas</h1>
+        <p>Administra y rastrea todas las ventas realizadas</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'adminpanel:venta_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nueva Venta
+        </a>
+    </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-number">{{ total_ventas }}</div>
+                    <div class="stat-label">Total Ventas</div>
+                </div>
+                <div class="stat-icon primary">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-number">{{ ventas_completadas }}</div>
+                    <div class="stat-label">Completadas</div>
+                </div>
+                <div class="stat-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-number">{{ ventas_pendientes }}</div>
+                    <div class="stat-label">Pendientes</div>
+                </div>
+                <div class="stat-icon warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card info">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-number">${{ total_ingresos|floatformat:2 }}</div>
+                    <div class="stat-label">Ingresos Totales</div>
+                </div>
+                <div class="stat-icon info">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="modern-card">
+        <div class="card-header">
+            <h3><i class="fas fa-filter"></i> Filtros</h3>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="filter-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="search">Buscar</label>
+                        <input type="text" name="search" id="search" class="form-input" 
+                               value="{{ current_search|default:'' }}" placeholder="Número de factura, cliente...">
+                    </div>
+                    <div class="form-group">
+                        <label for="estado">Estado</label>
+                        <select name="estado" id="estado" class="form-input">
+                            <option value="">Todos los estados</option>
+                            <option value="pendiente" {% if current_estado == "pendiente" %}selected{% endif %}>Pendiente</option>
+                            <option value="procesando" {% if current_estado == "procesando" %}selected{% endif %}>Procesando</option>
+                            <option value="completada" {% if current_estado == "completada" %}selected{% endif %}>Completada</option>
+                            <option value="cancelada" {% if current_estado == "cancelada" %}selected{% endif %}>Cancelada</option>
+                            <option value="reembolsada" {% if current_estado == "reembolsada" %}selected{% endif %}>Reembolsada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente">Cliente</label>
+                        <select name="cliente" id="cliente" class="form-input">
+                            <option value="">Todos los clientes</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}" {% if current_cliente == cliente.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ cliente.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Filtrar
+                            </button>
+                            <a href="{% url 'adminpanel:ventas_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Limpiar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Ventas -->
+    <div class="modern-card">
+        <div class="card-header">
+            <h3><i class="fas fa-list"></i> Ventas ({{ total_ventas }})</h3>
+        </div>
+        <div class="card-body">
+            {% if ventas %}
+                <div class="sales-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-file-invoice"></i> Factura</th>
+                                <th><i class="fas fa-user"></i> Cliente</th>
+                                <th><i class="fas fa-tag"></i> Estado</th>
+                                <th><i class="fas fa-credit-card"></i> Método Pago</th>
+                                <th><i class="fas fa-dollar-sign"></i> Total</th>
+                                <th><i class="fas fa-calendar"></i> Fecha</th>
+                                <th><i class="fas fa-cogs"></i> Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for venta in ventas %}
+                                <tr>
+                                    <td>
+                                        <div class="invoice-info">
+                                            <h4>{{ venta.numero_factura }}</h4>
+                                            {% if venta.descripcion %}
+                                                <small>{{ venta.descripcion|truncatechars:30 }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="client-info">
+                                            <h4>{{ venta.cliente.nombre }}</h4>
+                                            <p>{{ venta.cliente.email }}</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge {{ venta.estado }}">
+                                            {% if venta.estado == 'pendiente' %}
+                                                <i class="fas fa-clock"></i> Pendiente
+                                            {% elif venta.estado == 'procesando' %}
+                                                <i class="fas fa-cog"></i> Procesando
+                                            {% elif venta.estado == 'completada' %}
+                                                <i class="fas fa-check-circle"></i> Completada
+                                            {% elif venta.estado == 'cancelada' %}
+                                                <i class="fas fa-times-circle"></i> Cancelada
+                                            {% elif venta.estado == 'reembolsada' %}
+                                                <i class="fas fa-undo"></i> Reembolsada
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="payment-info">
+                                            <span class="payment-method">
+                                                {% if venta.metodo_pago == 'tarjeta' %}
+                                                    <i class="fas fa-credit-card"></i> Tarjeta
+                                                {% elif venta.metodo_pago == 'transferencia' %}
+                                                    <i class="fas fa-university"></i> Transferencia
+                                                {% elif venta.metodo_pago == 'paypal' %}
+                                                    <i class="fab fa-paypal"></i> PayPal
+                                                {% elif venta.metodo_pago == 'efectivo' %}
+                                                    <i class="fas fa-money-bill"></i> Efectivo
+                                                {% elif venta.metodo_pago == 'crypto' %}
+                                                    <i class="fas fa-bitcoin"></i> Crypto
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="amount-info">
+                                            <span class="amount-value">${{ venta.valor_total|floatformat:2 }}</span>
+                                            {% if venta.descuento > 0 %}
+                                                <small class="discount">-{{ venta.descuento|floatformat:2 }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="date">
+                                            <div class="day">{{ venta.fecha_venta|date:"d" }}</div>
+                                            <div class="month">{{ venta.fecha_venta|date:"M" }}</div>
+                                            <div class="year">{{ venta.fecha_venta|date:"Y" }}</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="actions">
+                                            <a href="{% url 'adminpanel:venta_edit' venta.id %}" 
+                                               class="btn-small btn-primary" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="#" class="btn-small btn-info" title="Ver Detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'adminpanel:venta_delete' venta.id %}" 
+                                               class="btn-small btn-danger" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Paginación -->
+                {% if ventas.has_other_pages %}
+                    <div class="pagination">
+                        {% if ventas.has_previous %}
+                            <a href="?page={{ ventas.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_estado %}&estado={{ current_estado }}{% endif %}{% if current_cliente %}&cliente={{ current_cliente }}{% endif %}" class="page-link">
+                                <i class="fas fa-chevron-left"></i> Anterior
+                            </a>
+                        {% endif %}
+                        
+                        <span class="page-info">
+                            Página {{ ventas.number }} de {{ ventas.paginator.num_pages }}
+                        </span>
+                        
+                        {% if ventas.has_next %}
+                            <a href="?page={{ ventas.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_estado %}&estado={{ current_estado }}{% endif %}{% if current_cliente %}&cliente={{ current_cliente }}{% endif %}" class="page-link">
+                                Siguiente <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h4>No hay ventas registradas</h4>
+                    <p>Comienza registrando tu primera venta para gestionar tus ingresos</p>
+                    <a href="{% url 'adminpanel:venta_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Registrar Venta
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .sales-table {
+        overflow-x: auto;
+    }
+    
+    .sales-table table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+    
+    .sales-table th,
+    .sales-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .sales-table th {
+        background: rgba(255, 255, 255, 0.05);
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .invoice-info h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .invoice-info small {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+    
+    .client-info h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+    
+    .client-info p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .status-badge.pendiente {
+        background: rgba(255, 193, 7, 0.2);
+        color: var(--warning-color);
+    }
+    
+    .status-badge.procesando {
+        background: rgba(23, 162, 184, 0.2);
+        color: var(--info-color);
+    }
+    
+    .status-badge.completada {
+        background: rgba(40, 167, 69, 0.2);
+        color: var(--success-color);
+    }
+    
+    .status-badge.cancelada {
+        background: rgba(220, 53, 69, 0.2);
+        color: var(--danger-color);
+    }
+    
+    .status-badge.reembolsada {
+        background: rgba(108, 117, 125, 0.2);
+        color: var(--text-muted);
+    }
+    
+    .payment-method {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    
+    .amount-info {
+        text-align: center;
+    }
+    
+    .amount-value {
+        display: block;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--success-color);
+    }
+    
+    .discount {
+        color: var(--danger-color);
+        font-size: 0.8rem;
+    }
+    
+    .date {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .date .day {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .date .month {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+    }
+    
+    .date .year {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+    }
+    
+    .actions {
+        display: flex;
+        gap: 0.25rem;
+        justify-content: center;
+    }
+    
+    .btn-small {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-small:hover {
+        transform: translateY(-1px);
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--glass-border);
+    }
+    
+    .page-link {
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 6px;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .page-link:hover {
+        background: rgba(255, 102, 0, 0.1);
+        border-color: var(--primary-color);
+    }
+    
+    .page-info {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .sales-table {
+            font-size: 0.8rem;
+        }
+        
+        .sales-table th,
+        .sales-table td {
+            padding: 0.5rem;
+        }
+        
+        .actions {
+            flex-direction: column;
+            gap: 0.1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}{{ block.super }}{% endblock %} 

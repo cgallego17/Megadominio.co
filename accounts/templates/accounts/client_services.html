@@ -1,0 +1,221 @@
+{% extends 'accounts/client_base.html' %}
+
+{% block title %}Mis Servicios - Megadominio{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0" style="color: #ffffff !important;">Mis Servicios</h1>
+            <p class="text-muted" style="color: #888 !important;">Gestiona todos tus servicios contratados</p>
+        </div>
+        <div>
+            <a href="{% url 'services:home' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>
+                Contratar Servicio
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="type" class="form-label">Tipo de Servicio</label>
+                    <select class="form-select" id="type" name="type">
+                        <option value="">Todos los tipos</option>
+                        {% for value, label in service_types %}
+                            <option value="{{ value }}" {% if current_type == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Estado</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">Todos los estados</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-filter me-2"></i>
+                        Filtrar
+                    </button>
+                    <a href="{% url 'accounts:client_services' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>
+                        Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Services List -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-server me-2"></i>
+                Servicios ({{ services.count }})
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if services %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Servicio</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Fecha Inicio</th>
+                                <th>Vencimiento</th>
+                                <th>Precio</th>
+                                <th>Renovación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for service in services %}
+                                <tr class="{% if service.is_expired %}table-danger{% elif service.is_expiring_soon %}table-warning{% endif %}">
+                                    <td>
+                                        <div>
+                                            <strong>{{ service.name }}</strong>
+                                            {% if service.domain_name %}
+                                                <br><small class="text-muted">{{ service.domain_name }}</small>
+                                            {% endif %}
+                                            {% if service.description %}
+                                                <br><small class="text-muted">{{ service.description|truncatewords:10 }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ service.get_service_type_display }}</span>
+                                        {% if service.hosting_plan %}
+                                            <br><small class="text-muted">{{ service.hosting_plan.name }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if service.status == 'active' %}
+                                            <span class="badge bg-success badge-status">Activo</span>
+                                        {% elif service.status == 'expired' %}
+                                            <span class="badge bg-danger badge-status">Vencido</span>
+                                        {% elif service.status == 'suspended' %}
+                                            <span class="badge bg-warning badge-status">Suspendido</span>
+                                        {% elif service.status == 'cancelled' %}
+                                            <span class="badge bg-secondary badge-status">Cancelado</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary badge-status">{{ service.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ service.start_date|date:"d/m/Y" }}
+                                    </td>
+                                    <td>
+                                        <div>
+                                            {{ service.expiry_date|date:"d/m/Y" }}
+                                            {% with days=service.days_until_expiry %}
+                                                {% if days is not None %}
+                                                    <br>
+                                                    {% if days < 0 %}
+                                                        <small class="text-danger">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                                            Vencido hace {{ days|floatformat:0|slice:"1:" }} días
+                                                        </small>
+                                                    {% elif days == 0 %}
+                                                        <small class="text-warning">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                                            Vence hoy
+                                                        </small>
+                                                    {% elif days <= 7 %}
+                                                        <small class="text-danger">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                                            {{ days }} días
+                                                        </small>
+                                                    {% elif days <= 30 %}
+                                                        <small class="text-warning">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            {{ days }} días
+                                                        </small>
+                                                    {% else %}
+                                                        <small class="text-muted">{{ days }} días</small>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>${{ service.price }}</strong>
+                                        <br><small class="text-muted">{{ service.get_billing_cycle_display }}</small>
+                                    </td>
+                                    <td>
+                                        {% if service.auto_renew %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>
+                                                Automática
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-times me-1"></i>
+                                                Manual
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'accounts:service_detail' service.id %}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-server fa-4x text-muted mb-4"></i>
+                    <h4 class="text-muted">No se encontraron servicios</h4>
+                    {% if current_type or current_status %}
+                        <p class="text-muted">Prueba ajustando los filtros de búsqueda</p>
+                        <a href="{% url 'accounts:client_services' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>
+                            Limpiar Filtros
+                        </a>
+                    {% else %}
+                        <p class="text-muted">Explora nuestro catálogo de servicios para comenzar</p>
+                        <a href="{% url 'services:home' %}" class="btn btn-primary">
+                            <i class="fas fa-shopping-bag me-2"></i>
+                            Ver Servicios
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-submit form when filters change
+    document.getElementById('type').addEventListener('change', function() {
+        this.form.submit();
+    });
+    
+    document.getElementById('status').addEventListener('change', function() {
+        this.form.submit();
+    });
+</script>
+{% endblock %} 

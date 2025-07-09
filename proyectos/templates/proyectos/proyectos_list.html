@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyectos | megadominio.co</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <header>
+        <a href="/" class="btn">Inicio</a>
+        <h1>Proyectos realizados</h1>
+    </header>
+    <section class="proyectos-list">
+        {% for proyecto in proyectos %}
+        <div class="proyecto-card">
+            <img src="{{ proyecto.imagen.url }}" alt="{{ proyecto.nombre }}">
+            <div class="proyecto-info">
+                <h2>{{ proyecto.nombre }}</h2>
+                <p>{{ proyecto.descripcion }}</p>
+                <span class="tecnologias">{{ proyecto.tecnologias }}</span>
+                {% if proyecto.enlace %}
+                <a href="{{ proyecto.enlace }}" target="_blank" class="btn">Ver proyecto</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </section>
+    <footer>
+        <p>&copy; 2025 megadominio.co</p>
+    </footer>
+</body>
+</html> 

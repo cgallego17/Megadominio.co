@@ -1,0 +1,177 @@
+{% extends 'accounts/client_base.html' %}
+{% load service_extras %}
+
+{% block title %}Mis Órdenes - Megadominio.co{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="page-title mb-0" style="color: white !important;">Mis Órdenes</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb" style="background-color: #2d2d2d; padding: 10px 15px; border-radius: 8px; margin-top: 10px;">
+                            <li class="breadcrumb-item"><a href="{% url 'accounts:client_dashboard' %}" style="color: white;">Dashboard</a></li>
+                            <li class="breadcrumb-item active" style="color: #ff8c42;">Mis Órdenes</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="{% url 'services:home' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>
+                        Nueva Orden
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Indicador de Moneda -->
+    {% if user_currency %}
+    <div class="row mb-4">
+        <div class="col-12">
+            {% show_currency_indicator user_country user_currency %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if orders %}
+    <!-- Lista de Órdenes -->
+    <div class="row">
+        {% for order in orders %}
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card order-card h-100">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0" style="color: white !important;">
+                            <i class="fas fa-receipt me-2" style="color: #ff8c42;"></i>
+                            #{{ order.order_number }}
+                        </h5>
+                        <span class="badge {% if order.status == 'completed' %}bg-success{% elif order.status == 'processing' %}bg-warning{% elif order.status == 'pending' %}bg-info{% elif order.status == 'cancelled' %}bg-secondary{% else %}bg-danger{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                    <small class="text-muted">{{ order.created_at|date:"d/m/Y H:i" }}</small>
+                </div>
+                <div class="card-body">
+                    <!-- Items de la Orden -->
+                    <div class="order-items mb-3">
+                        <h6 style="color: white !important;">Servicios ({{ order.items.count }})</h6>
+                        {% for item in order.items.all|slice:":2" %}
+                        <div class="order-item-summary mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span style="color: #cccccc !important;">{{ item.service_name }}</span>
+                                    <br>
+                                    <small style="color: #ff8c42 !important;">
+                                        {{ item.get_billing_cycle_display }} × {{ item.quantity }}
+                                    </small>
+                                </div>
+                                <span style="color: #ff8c42 !important; font-weight: bold;">
+                                    {{ item.total_formatted }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if order.items.count > 2 %}
+                        <small style="color: #888 !important;">
+                            <i class="fas fa-plus me-1"></i>
+                            Y {{ order.items.count|add:"-2" }} más...
+                        </small>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Total -->
+                    <div class="order-total">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong style="color: white !important;">Total:</strong>
+                            <strong style="color: #ff8c42 !important; font-size: 1.2rem;">
+                                {{ order.total_formatted }}
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'accounts:order_detail' order.order_number %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye me-2"></i>
+                            Ver Detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% else %}
+    <!-- Sin Órdenes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-receipt fa-5x mb-4" style="color: #666;"></i>
+                    <h3 class="mb-3" style="color: white !important;">No tienes órdenes aún</h3>
+                    <p class="lead mb-4" style="color: #cccccc !important;">
+                        Explora nuestro catálogo de servicios y realiza tu primera compra.
+                    </p>
+                    <a href="{% url 'services:home' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-shopping-bag me-2"></i>
+                        Explorar Servicios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .order-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid #666;
+    }
+    
+    .order-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+    }
+    
+    .order-item-summary {
+        padding: 10px;
+        background-color: #404040;
+        border-radius: 5px;
+        border-left: 3px solid #ff8c42;
+    }
+    
+    .order-total {
+        padding: 15px;
+        background-color: #404040;
+        border-radius: 8px;
+        border: 2px solid #ff8c42;
+    }
+    
+    .badge.bg-success {
+        background-color: #28a745 !important;
+    }
+    
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+    
+    .badge.bg-info {
+        background-color: #17a2b8 !important;
+    }
+    
+    .badge.bg-secondary {
+        background-color: #6c757d !important;
+    }
+    
+    .badge.bg-danger {
+        background-color: #dc3545 !important;
+    }
+</style>
+{% endblock %} 

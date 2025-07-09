@@ -1,0 +1,538 @@
+{% extends 'adminpanel/dashboard.html' %}
+{% load static %}
+
+{% block title %}Servicios Vendibles - Panel Admin | Megadominio{% endblock %}
+
+{% block dashboard_active %}{% endblock %}
+{% block servicios_vendibles_active %}active{% endblock %}
+
+{% block page_header %}
+<header class="page-header">
+    <div>
+        <h1><i class="fas fa-shopping-cart"></i> Servicios Vendibles</h1>
+        <p>Gestiona el catálogo de servicios que aparecen en la web</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'adminpanel:servicio_vendible_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nuevo Servicio
+        </a>
+    </div>
+</header>
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-container">
+    <!-- Estadísticas -->
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ stats.total }}</div>
+                            <div class="stat-label">Total Servicios</div>
+                        </div>
+                        <div class="stat-icon primary">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ stats.active }}</div>
+                            <div class="stat-label">Activos</div>
+                        </div>
+                        <div class="stat-icon success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ stats.featured }}</div>
+                            <div class="stat-label">Destacados</div>
+                        </div>
+                        <div class="stat-icon warning">
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ stats.categories }}</div>
+                            <div class="stat-label">Categorías</div>
+                        </div>
+                        <div class="stat-icon info">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="modern-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-filter"></i> Filtros</h3>
+                </div>
+                <div class="card-body">
+                    <form method="GET" class="filter-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="home_service">Servicio del Home</label>
+                                <select name="home_service" id="home_service" class="form-input">
+                                    <option value="">Todos los servicios</option>
+                                    {% for home_service in home_services %}
+                                        <option value="{{ home_service.id }}" {% if current_category == home_service.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ home_service.nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="is_active">Estado</label>
+                                <select name="is_active" id="is_active" class="form-input">
+                                    <option value="">Todos</option>
+                                    <option value="true" {% if current_active == "true" %}selected{% endif %}>Activos</option>
+                                    <option value="false" {% if current_active == "false" %}selected{% endif %}>Inactivos</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="search">Buscar</label>
+                                <input type="text" name="search" id="search" class="form-input" 
+                                       value="{{ current_search|default:'' }}" placeholder="Nombre o descripción...">
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i> Filtrar
+                                    </button>
+                                    <a href="{% url 'adminpanel:servicios_vendibles_list' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Limpiar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista de Servicios -->
+            <div class="modern-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> Servicios ({{ servicios.count }})</h3>
+                </div>
+                <div class="card-body">
+                    {% if servicios %}
+                        <div class="services-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-cube"></i> Servicio</th>
+                                        <th><i class="fas fa-tag"></i> Categoría</th>
+                                        <th><i class="fas fa-dollar-sign"></i> Precios</th>
+                                        <th><i class="fas fa-toggle-on"></i> Estado</th>
+                                        <th><i class="fas fa-star"></i> Destacado</th>
+                                        <th><i class="fas fa-calendar"></i> Fecha</th>
+                                        <th><i class="fas fa-cogs"></i> Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for servicio in servicios %}
+                                        <tr>
+                                            <td>
+                                                <div class="service-info">
+                                                    <h4>{{ servicio.name }}</h4>
+                                                    <p>{{ servicio.short_description|truncatechars:60 }}</p>
+                                                    {% if servicio.slug %}
+                                                        <small>{{ servicio.slug }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge">{{ servicio.home_service.nombre }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="price-list">
+                                                    {% if servicio.price_monthly %}
+                                                        <div class="price-item">
+                                                            <span>Mensual:</span>
+                                                            <strong>${{ servicio.price_monthly }}</strong>
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if servicio.price_annual %}
+                                                        <div class="price-item">
+                                                            <span>Anual:</span>
+                                                            <strong>${{ servicio.price_annual }}</strong>
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if servicio.price_one_time %}
+                                                        <div class="price-item">
+                                                            <span>Único:</span>
+                                                            <strong>${{ servicio.price_one_time }}</strong>
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if servicio.setup_fee and servicio.setup_fee > 0 %}
+                                                        <div class="price-item setup">
+                                                            <span>Setup:</span>
+                                                            <strong>${{ servicio.setup_fee }}</strong>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {% if servicio.is_active %}
+                                                    <span class="status active">
+                                                        <i class="fas fa-check-circle"></i> Activo
+                                                    </span>
+                                                {% else %}
+                                                    <span class="status inactive">
+                                                        <i class="fas fa-times-circle"></i> Inactivo
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if servicio.is_featured %}
+                                                    <span class="featured">
+                                                        <i class="fas fa-star"></i> Destacado
+                                                    </span>
+                                                {% else %}
+                                                    <span class="featured empty">
+                                                        <i class="far fa-star"></i> Normal
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="date">
+                                                    <div class="day">{{ servicio.created_at|date:"d" }}</div>
+                                                    <div class="month">{{ servicio.created_at|date:"M" }}</div>
+                                                    <div class="year">{{ servicio.created_at|date:"Y" }}</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="actions">
+                                                    <a href="{% url 'adminpanel:servicio_vendible_edit' servicio.id %}" 
+                                                       class="btn btn-small btn-primary" title="Editar">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'adminpanel:servicio_vendible_delete' servicio.id %}" 
+                                                       class="btn btn-small btn-danger" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h3>No hay servicios vendibles</h3>
+                            <p>Comienza creando tu primer servicio para el catálogo</p>
+                            <a href="{% url 'adminpanel:servicio_vendible_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Crear Primer Servicio
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <style>
+        /* Estilos específicos para la tabla de servicios */
+        .services-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .services-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--background-card);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .services-table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .services-table th i {
+            margin-right: 8px;
+        }
+
+        .services-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            vertical-align: middle;
+        }
+
+        .services-table tr:hover {
+            background: rgba(255, 102, 0, 0.05);
+        }
+
+        /* Información del servicio */
+        .service-info h4 {
+            color: var(--text-primary);
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .service-info p {
+            color: var(--text-secondary);
+            margin: 0 0 5px 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .service-info small {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Precios */
+        .price-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .price-item span {
+            color: var(--text-secondary);
+        }
+
+        .price-item strong {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .price-item.setup strong {
+            color: var(--warning-color);
+        }
+
+        /* Estados */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status.active {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+        }
+
+        .status.inactive {
+            background: rgba(108, 117, 125, 0.2);
+            color: var(--text-muted);
+        }
+
+        /* Destacados */
+        .featured {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: rgba(255, 193, 7, 0.2);
+            color: var(--warning-color);
+        }
+
+        .featured.empty {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+        }
+
+        /* Fecha */
+        .date {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .date .day {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .date .month {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .date .year {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Acciones */
+        .actions {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .btn-small {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* Filtros */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: var(--background-card);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        select.form-input {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 8px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        select.form-input option {
+            background: var(--background-card);
+            color: var(--text-primary);
+            padding: 8px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Tarjetas modernas */
+        .modern-card {
+            background: var(--background-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modern-card .card-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(255, 102, 0, 0.1) 0%, transparent 100%);
+        }
+
+        .modern-card .card-header h3 {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modern-card .card-body {
+            padding: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .services-table {
+                font-size: 0.8rem;
+            }
+            
+            .services-table th,
+            .services-table td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+{% endblock %} 
+{% block extra_js %}{{ block.super }}{% endblock %} 

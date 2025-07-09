@@ -1,0 +1,270 @@
+{% extends 'servicios/public_base.html' %}
+{% load static %}
+
+{% block title %}Confirmación de Orden #{{ order.order_number }} - megadominio.co{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/fresh-start.css' %}">
+<style>
+.confirmation-body {
+    background: #000000;
+    min-height: 100vh;
+    position: relative;
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+.confirmation-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
+.confirmation-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffffff, #ff6600);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.confirmation-content {
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    padding: 40px;
+    color: white;
+    box-shadow: 0 8px 30px rgba(255,102,0,0.08);
+    max-width: 800px;
+    margin: 0 auto;
+}
+.order-number {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.order-number h2 {
+    color: #ff6600;
+    font-size: 2rem;
+    font-weight: 700;
+}
+.order-status {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.status-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.status-pending {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid #ffc107;
+}
+.status-processing {
+    background: rgba(0, 123, 255, 0.2);
+    color: #007bff;
+    border: 1px solid #007bff;
+}
+.status-completed {
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+    border: 1px solid #28a745;
+}
+.status-cancelled {
+    background: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+.order-details {
+    margin-bottom: 30px;
+}
+.order-details h3 {
+    color: #ff6600;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+.order-items {
+    margin-bottom: 30px;
+}
+.order-item {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 4px solid #ff6600;
+}
+.order-item h4 {
+    color: #ff6600;
+    margin-bottom: 10px;
+}
+.order-item p {
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 5px;
+}
+.order-total {
+    text-align: right;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+.order-total h3 {
+    color: #ff6600;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+.customer-info {
+    margin-bottom: 30px;
+}
+.customer-info h3 {
+    color: #ff6600;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+.customer-info p {
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 8px;
+}
+.action-buttons {
+    text-align: center;
+    margin-top: 40px;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #ff6600, #ff8533);
+    border: none;
+    border-radius: 15px;
+    padding: 15px 40px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(255, 102, 0, 0.3);
+    margin: 0 10px;
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, #ff8533, #ffcc33);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+.btn-secondary {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid #ff6600;
+    border-radius: 15px;
+    padding: 15px 40px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin: 0 10px;
+}
+.btn-secondary:hover {
+    background: rgba(255,102,0,0.2);
+    color: white;
+    text-decoration: none;
+}
+@media (max-width: 768px) {
+    .confirmation-header h1 {
+        font-size: 1.5rem;
+    }
+    .confirmation-content {
+        padding: 20px;
+    }
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .btn-primary, .btn-secondary {
+        margin: 0;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirmation-body">
+    <section class="confirmation-header">
+        <h1>¡Orden Confirmada!</h1>
+        <p>Gracias por tu compra. Tu orden ha sido procesada exitosamente.</p>
+    </section>
+    
+    <div class="container">
+        <div class="confirmation-content">
+            <div class="order-number">
+                <h2>Orden #{{ order.order_number }}</h2>
+            </div>
+            
+            <div class="order-status">
+                <span class="status-badge status-{{ order.status }}">
+                    {% if order.status == 'pending' %}
+                        Pendiente
+                    {% elif order.status == 'processing' %}
+                        Procesando
+                    {% elif order.status == 'completed' %}
+                        Completada
+                    {% elif order.status == 'cancelled' %}
+                        Cancelada
+                    {% else %}
+                        {{ order.status|title }}
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="customer-info">
+                <h3>Información del Cliente</h3>
+                <p><strong>Nombre:</strong> {{ order.billing_name }}</p>
+                <p><strong>Email:</strong> {{ order.billing_email }}</p>
+                {% if order.billing_address %}
+                <p><strong>Dirección:</strong> {{ order.billing_address }}</p>
+                {% endif %}
+                <p><strong>Fecha:</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+            </div>
+            
+            <div class="order-details">
+                <h3>Detalles de la Orden</h3>
+                <div class="order-items">
+                    {% for item in order.items.all %}
+                    <div class="order-item">
+                        <h4>{{ item.service_name }}</h4>
+                        <p><strong>Ciclo de facturación:</strong> {{ item.billing_cycle|title }}</p>
+                        <p><strong>Cantidad:</strong> {{ item.quantity }}</p>
+                        <p><strong>Precio unitario:</strong> {{ item.unit_price }}</p>
+                        <p><strong>Total:</strong> {{ item.total_price }}</p>
+                        {% if item.domain_name %}
+                        <p><strong>Dominio:</strong> {{ item.domain_name }}</p>
+                        {% endif %}
+                        {% if item.notes %}
+                        <p><strong>Notas:</strong> {{ item.notes }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="order-total">
+                    <h3>Total: {{ order.total_amount }}</h3>
+                </div>
+            </div>
+            
+            {% if order.notes %}
+            <div class="order-notes">
+                <h3>Notas Adicionales</h3>
+                <p>{{ order.notes }}</p>
+            </div>
+            {% endif %}
+            
+            <div class="action-buttons">
+                <a href="{% url 'services:home' %}" class="btn btn-secondary">
+                    <i class="fas fa-shopping-cart"></i> Seguir Comprando
+                </a>
+                <a href="{% url 'services:home' %}" class="btn btn-primary">
+                    <i class="fas fa-home"></i> Ir al Inicio
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,11 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="40" cy="40" r="20" fill="#ff6600" fill-opacity="0.1"/>
+  <circle cx="40" cy="40" r="20" stroke="#ff6600" stroke-width="2"/>
+  <path d="M40 20C40 20 50 30 50 40C50 50 40 60 40 60" stroke="#ff6600" stroke-width="2"/>
+  <path d="M40 20C40 20 30 30 30 40C30 50 40 60 40 60" stroke="#ff6600" stroke-width="2"/>
+  <path d="M20 40H60" stroke="#ff6600" stroke-width="2"/>
+  <path d="M25 30H55" stroke="#ff6600" stroke-width="1" stroke-opacity="0.6"/>
+  <path d="M25 50H55" stroke="#ff6600" stroke-width="1" stroke-opacity="0.6"/>
+  <rect x="45" y="15" width="20" height="8" rx="4" fill="#ff6600"/>
+  <text x="55" y="21" text-anchor="middle" fill="white" font-size="6" font-family="Arial">.co</text>
+</svg> 

@@ -1,0 +1,286 @@
+{% extends 'accounts/client_base.html' %}
+
+{% block title %}Notificaciones - Megadominio{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0" style="color: #ffffff !important;">Centro de Notificaciones</h1>
+            <p class="text-muted" style="color: #888 !important;">Mantente informado sobre tus servicios</p>
+        </div>
+        {% if notifications %}
+            <div>
+                <button class="btn btn-outline-primary" onclick="markAllAsRead()">
+                    <i class="fas fa-check-double me-2"></i>
+                    Marcar todas como leídas
+                </button>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% if notifications %}
+        <!-- Notifications List -->
+        <div class="row">
+            {% for notification in notifications %}
+                <div class="col-12 mb-3">
+                    <div class="card {% if not notification.is_read %}border-start border-primary border-3{% endif %}">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0 me-3">
+                                    {% if notification.notification_type == 'expiry_warning' %}
+                                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px;">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                    {% elif notification.notification_type == 'expired' %}
+                                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px;">
+                                            <i class="fas fa-times-circle"></i>
+                                        </div>
+                                    {% elif notification.notification_type == 'renewed' %}
+                                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px;">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                    {% elif notification.notification_type == 'suspended' %}
+                                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px;">
+                                            <i class="fas fa-pause-circle"></i>
+                                        </div>
+                                    {% elif notification.notification_type == 'invoice' %}
+                                        <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px;">
+                                            <i class="fas fa-file-invoice"></i>
+                                        </div>
+                                    {% else %}
+                                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px;">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h5 class="mb-1 {% if not notification.is_read %}fw-bold{% endif %}">
+                                                {{ notification.title }}
+                                            </h5>
+                                            <div class="d-flex align-items-center text-muted small">
+                                                <span class="badge me-2" style="background-color: #ff8c42; color: white;">
+                                                    {{ notification.get_notification_type_display }}
+                                                </span>
+                                                <span class="me-2">{{ notification.created_at|timesince }} atrás</span>
+                                                {% if notification.sent_via_email %}
+                                                    <span class="me-2">
+                                                        <i class="fas fa-envelope text-info" title="Enviado por email"></i>
+                                                    </span>
+                                                {% endif %}
+                                                {% if not notification.is_read %}
+                                                    <span class="badge bg-primary">Nuevo</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                    type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                {% if not notification.is_read %}
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" 
+                                                           onclick="markAsRead({{ notification.id }})">
+                                                            <i class="fas fa-check me-2"></i>
+                                                            Marcar como leída
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                                <li>
+                                                    <a class="dropdown-item" 
+                                                       href="{% url 'accounts:service_detail' notification.service.id %}">
+                                                        <i class="fas fa-external-link-alt me-2"></i>
+                                                        Ver servicio
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="mb-2 {% if not notification.is_read %}fw-bold{% endif %}">
+                                        {{ notification.message }}
+                                    </p>
+                                    
+                                    <div class="d-flex align-items-center text-muted small">
+                                        <i class="fas fa-server me-2"></i>
+                                        <span>{{ notification.service.name }}</span>
+                                        {% if notification.service.domain_name %}
+                                            <span class="mx-2">•</span>
+                                            <span>{{ notification.service.domain_name }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination if needed -->
+        {% if notifications|length > 20 %}
+            <nav aria-label="Navegación de notificaciones">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Anterior">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Siguiente">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
+        
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-bell-slash fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted">No tienes notificaciones</h4>
+            <p class="text-muted">Las notificaciones sobre tus servicios aparecerán aquí</p>
+            <a href="{% url 'accounts:client_dashboard' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver al Dashboard
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal para confirmar acciones -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Acción</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmAction">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .border-start {
+        border-left-width: 4px !important;
+    }
+    
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function markAsRead(notificationId) {
+        fetch(`/accounts/mark-notification-read/${notificationId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error al marcar la notificación como leída');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al marcar la notificación como leída');
+        });
+    }
+    
+    function markAllAsRead() {
+        document.getElementById('confirmMessage').textContent = 
+            '¿Estás seguro de que deseas marcar todas las notificaciones como leídas?';
+        
+        document.getElementById('confirmAction').onclick = function() {
+            // Crear formulario para enviar todas las notificaciones
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{% url "accounts:client_notifications" %}';
+            
+            // Agregar token CSRF
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = 'csrfmiddlewaretoken';
+            csrfToken.value = getCookie('csrftoken');
+            form.appendChild(csrfToken);
+            
+            // Agregar todas las notificaciones
+            {% for notification in notifications %}
+                {% if not notification.is_read %}
+                    const input{{ notification.id }} = document.createElement('input');
+                    input{{ notification.id }}.type = 'hidden';
+                    input{{ notification.id }}.name = 'notification_ids';
+                    input{{ notification.id }}.value = '{{ notification.id }}';
+                    form.appendChild(input{{ notification.id }});
+                {% endif %}
+            {% endfor %}
+            
+            document.body.appendChild(form);
+            form.submit();
+        };
+        
+        new bootstrap.Modal(document.getElementById('confirmModal')).show();
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %} 

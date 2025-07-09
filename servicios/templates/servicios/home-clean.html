@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>megadominio.co - Soluciones Digitales Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/fresh-start.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- NAVEGACIÓN -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <span class="logo-text">megadominio<span class="logo-accent">.co</span></span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#inicio" class="nav-link active">Inicio</a></li>
+                <li><a href="#servicios" class="nav-link">Servicios</a></li>
+                <li><a href="#proyectos" class="nav-link">Proyectos</a></li>
+                <li><a href="#contacto" class="nav-link">Contacto</a></li>
+                <li><a href="/panel/login/" class="nav-cta">Panel Admin</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="inicio" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">🚀 Soluciones Digitales Premium</div>
+                <h1 class="hero-title">
+                    Impulsa tu <span class="gradient-text">presencia digital</span> 
+                    con tecnología de vanguardia
+                </h1>
+                <p class="hero-subtitle">
+                    Desarrollo web, software personalizado, ecommerce y hosting de alta calidad 
+                    para empresas que buscan destacar en el mundo digital.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#servicios" class="btn-hero-primary">
+                        <span>Ver Servicios</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="#proyectos" class="btn-hero-secondary">
+                        <i class="fas fa-play"></i>
+                        <span>Ver Proyectos</span>
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-card">
+                    <div class="card-header">
+                        <div class="card-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <div class="card-title">megadominio.co</div>
+                        <div class="copy-button" onclick="copyConsoleContent()" title="Copiar contenido">
+                            <i class="fas fa-copy"></i>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="console-line copyable-line" data-copy="console.log('Megadominio iniciado...')" style="color: #ff6600; margin-bottom: 15px; font-size: 14px;">
+                            <i class="fas fa-terminal"></i> console.log('Megadominio iniciado...')
+                            <span class="copy-indicator">Copiado!</span>
+                        </div>
+                        <div class="service-item copyable-line" data-copy="✓ Sitios web modernos" style="color: #000000; background: rgba(255, 255, 255, 0.9); padding: 4px 10px; border-radius: 8px; margin-bottom: 8px; font-size: 12px; font-weight: 600;">
+                            ✓ Sitios web modernos
+                            <span class="copy-indicator">Copiado!</span>
+                        </div>
+                        <div class="service-item copyable-line" data-copy="✓ Software personalizado" style="color: #000000; background: rgba(255, 255, 255, 0.9); padding: 4px 10px; border-radius: 8px; margin-bottom: 8px; font-size: 12px; font-weight: 600;">
+                            ✓ Software personalizado
+                            <span class="copy-indicator">Copiado!</span>
+                        </div>
+                        <div class="service-item copyable-line" data-copy="✓ Ecommerce avanzado" style="color: #000000; background: rgba(255, 255, 255, 0.9); padding: 4px 10px; border-radius: 8px; margin-bottom: 8px; font-size: 12px; font-weight: 600;">
+                            ✓ Ecommerce avanzado
+                            <span class="copy-indicator">Copiado!</span>
+                        </div>
+                        <div class="service-item copyable-line" data-copy="✓ Hosting premium" style="color: #000000; background: rgba(255, 255, 255, 0.9); padding: 4px 10px; border-radius: 8px; margin-bottom: 12px; font-size: 12px; font-weight: 600;">
+                            ✓ Hosting premium
+                            <span class="copy-indicator">Copiado!</span>
+                        </div>
+                        <div class="status-line copyable-line" data-copy="> Estado: ONLINE" style="color: #00ff66; font-size: 11px; text-align: center; font-family: 'Courier New', monospace;">
+                            > Estado: ONLINE
+                            <span class="copy-indicator">Copiado!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVICIOS -->
+    <section id="servicios" class="section">
+        <div class="section-content">
+            <h2 class="section-title">Nuestros Servicios</h2>
+            <p class="section-subtitle">
+                Soluciones digitales completas para impulsar tu negocio al siguiente nivel
+            </p>
+            
+            <div class="services-grid">
+                {% for servicio in servicios %}
+                <div class="glass-card floating-element" style="padding: 40px 30px; text-align: center;" data-service-name="{{ servicio.nombre }}">
+                    <div class="service-icon" style="width: 80px; height: 80px; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(255, 102, 0, 0.2), rgba(10, 10, 10, 0.3)); border-radius: 20px; border: 1px solid rgba(255, 102, 0, 0.3);">
+                        {% if servicio.imagen %}
+                            <img src="{{ servicio.imagen.url }}" alt="{{ servicio.nombre }}" style="width: 40px; height: 40px; object-fit: contain; filter: brightness(0) saturate(100%) invert(47%) sepia(98%) saturate(3589%) hue-rotate(20deg) brightness(100%) contrast(101%);">
+                        {% else %}
+                            <i class="service-auto-icon fas fa-cogs" style="font-size: 32px; color: #ff6600;"></i>
+                        {% endif %}
+                    </div>
+                    <h3 class="service-title" style="font-size: 1.4rem; font-weight: 600; color: #fff; margin-bottom: 15px;">{{ servicio.nombre }}</h3>
+                    <p class="service-description" style="color: #ccc; line-height: 1.6;">{{ servicio.descripcion }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- PROYECTOS -->
+    <section id="proyectos" class="section">
+        <div class="section-content">
+            <h2 class="section-title">Nuestros Proyectos</h2>
+            <p class="section-subtitle">
+                Casos de éxito que demuestran nuestra experiencia y calidad
+            </p>
+            
+            <div class="projects-grid">
+                {% for proyecto in proyectos %}
+                <div class="glass-card glass-shine" style="overflow: hidden;">
+                    <div class="project-image" style="position: relative; overflow: hidden; height: 200px;">
+                        {% if proyecto.imagen %}
+                            <img src="{{ proyecto.imagen.url }}" alt="{{ proyecto.nombre }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, rgba(255, 102, 0, 0.1), rgba(8, 8, 8, 0.9)); display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-image" style="font-size: 3rem; color: rgba(255, 102, 0, 0.5);"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="project-content" style="padding: 30px; text-align: center;">
+                        <h4 class="project-title" style="color: #fff; font-size: 1.3rem; margin-bottom: 10px;">{{ proyecto.nombre }}</h4>
+                        <p class="project-description" style="color: #ffffff; line-height: 1.5; margin-bottom: 15px;">{{ proyecto.descripcion }}</p>
+                        <p class="project-tech" style="color: #333333; background: rgba(255, 255, 255, 0.8); padding: 5px 10px; border-radius: 15px; font-size: 0.9rem; margin-bottom: 15px; font-weight: 600; display: inline-block;">{{ proyecto.tecnologias }}</p>
+                        {% if proyecto.enlace %}
+                        <a href="{{ proyecto.enlace }}" target="_blank" class="project-link" style="display: inline-flex; align-items: center; gap: 8px; color: #000000; background: rgba(255, 255, 255, 0.9); text-decoration: none; font-weight: 600; padding: 10px 20px; border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 25px; transition: all 0.3s ease;">
+                            Ver Proyecto <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ESTADÍSTICAS -->
+    <section class="section">
+        <div class="section-content">
+            <h2 class="section-title">Resultados que hablan por sí solos</h2>
+            
+            <div class="stats-grid">
+                <div style="padding: 30px 20px;">
+                    <div class="stat-number" style="font-size: 3rem; font-weight: 800; color: #ff6600; margin-bottom: 10px;">50+</div>
+                    <div class="stat-label" style="color: #ccc; font-size: 1.1rem; font-weight: 500;">Proyectos Completados</div>
+                </div>
+                <div style="padding: 30px 20px;">
+                    <div class="stat-number" style="font-size: 3rem; font-weight: 800; color: #ff6600; margin-bottom: 10px;">100%</div>
+                    <div class="stat-label" style="color: #ccc; font-size: 1.1rem; font-weight: 500;">Clientes Satisfechos</div>
+                </div>
+                <div style="padding: 30px 20px;">
+                    <div class="stat-number" style="font-size: 3rem; font-weight: 800; color: #ff6600; margin-bottom: 10px;">24/7</div>
+                    <div class="stat-label" style="color: #ccc; font-size: 1.1rem; font-weight: 500;">Soporte Técnico</div>
+                </div>
+                <div style="padding: 30px 20px;">
+                    <div class="stat-number" style="font-size: 3rem; font-weight: 800; color: #ff6600; margin-bottom: 10px;">5★</div>
+                    <div class="stat-label" style="color: #ccc; font-size: 1.1rem; font-weight: 500;">Calificación Promedio</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACTO -->
+    <section id="contacto" class="section">
+        <div class="section-content">
+            <h2 class="section-title">¿Listo para comenzar?</h2>
+            <p class="section-subtitle">
+                Contáctanos hoy y descubre cómo podemos ayudarte a alcanzar tus objetivos digitales
+            </p>
+            
+            <div class="contact-grid">
+                <div class="contact-benefits">
+                    <h3 style="color: #fff; font-size: 1.5rem; margin-bottom: 20px;">¿Por qué elegirnos?</h3>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div class="benefit-item" style="display: flex; align-items: center; gap: 15px; color: #ccc;">
+                            <i class="fas fa-check" style="color: #ff6600; width: 20px;"></i>
+                            <span>Consulta gratuita</span>
+                        </div>
+                        <div class="benefit-item" style="display: flex; align-items: center; gap: 15px; color: #ccc;">
+                            <i class="fas fa-check" style="color: #ff6600; width: 20px;"></i>
+                            <span>Respuesta en 24 horas</span>
+                        </div>
+                        <div class="benefit-item" style="display: flex; align-items: center; gap: 15px; color: #ccc;">
+                            <i class="fas fa-check" style="color: #ff6600; width: 20px;"></i>
+                            <span>Presupuesto personalizado</span>
+                        </div>
+                        <div class="benefit-item" style="display: flex; align-items: center; gap: 15px; color: #ccc;">
+                            <i class="fas fa-check" style="color: #ff6600; width: 20px;"></i>
+                            <span>Soporte técnico incluido</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <form class="glass-panel contact-form" style="padding: 40px;" method="post" action="#">
+                    {% csrf_token %}
+                    <div style="margin-bottom: 25px;">
+                        <input type="text" name="nombre" placeholder="Tu nombre" required class="glass-input form-input" style="width: 100%; padding: 15px 20px; border-radius: 10px; font-size: 1rem;">
+                    </div>
+                    <div style="margin-bottom: 25px;">
+                        <input type="email" name="email" placeholder="Tu email" required class="glass-input form-input" style="width: 100%; padding: 15px 20px; border-radius: 10px; font-size: 1rem;">
+                    </div>
+                    <div style="margin-bottom: 25px;">
+                        <textarea name="mensaje" placeholder="¿En qué podemos ayudarte?" required class="glass-input form-input" style="width: 100%; padding: 15px 20px; border-radius: 10px; font-size: 1rem; resize: vertical; min-height: 120px;"></textarea>
+                    </div>
+                    <button type="submit" class="btn-form form-button" style="background: linear-gradient(135deg, #ff6600, #ff8533); color: white; padding: 15px 40px; border: none; border-radius: 30px; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <span>Enviar Mensaje</span>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="glass-panel" style="color: white; padding: 4rem 0 2rem; position: relative; border-radius: 0; border-left: none; border-right: none; border-bottom: none;">
+        <div style="max-width: 1200px; padding: 0 2rem; margin: 0 auto;">
+            <div class="footer-grid">
+                <div>
+                    <h3 style="color: #ff6600; font-size: 1.5rem; margin-bottom: 15px;">megadominio.co</h3>
+                    <p style="color: #ccc; line-height: 1.6;">Transformando ideas en soluciones digitales excepcionales.</p>
+                    <div style="display: flex; gap: 15px; margin-top: 20px; justify-content: center;">
+                        <a href="#" style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 102, 0, 0.1); border: 1px solid rgba(255, 102, 0, 0.3); display: flex; align-items: center; justify-content: center; color: #ff6600; text-decoration: none;">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 102, 0, 0.1); border: 1px solid rgba(255, 102, 0, 0.3); display: flex; align-items: center; justify-content: center; color: #ff6600; text-decoration: none;">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 102, 0, 0.1); border: 1px solid rgba(255, 102, 0, 0.3); display: flex; align-items: center; justify-content: center; color: #ff6600; text-decoration: none;">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 102, 0, 0.1); border: 1px solid rgba(255, 102, 0, 0.3); display: flex; align-items: center; justify-content: center; color: #ff6600; text-decoration: none;">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: #fff; margin-bottom: 20px; font-size: 1.1rem;">Servicios</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Desarrollo Web</a>
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Software a Medida</a>
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Ecommerce</a>
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Hosting</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: #fff; margin-bottom: 20px; font-size: 1.1rem;">Empresa</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Sobre Nosotros</a>
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Proyectos</a>
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Blog</a>
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Contacto</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: #fff; margin-bottom: 20px; font-size: 1.1rem;">Soporte</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Centro de Ayuda</a>
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Documentación</a>
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Status</a>
+                        <a href="#" style="color: #ccc; text-decoration: none; padding: 5px 0;">Panel Admin</a>
+                    </div>
+                </div>
+            </div>
+            <div style="border-top: 1px solid rgba(255, 102, 0, 0.1); padding-top: 30px; text-align: center; color: #999;">
+                <p>&copy; 2025 megadominio.co. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/fresh-start.js"></script>
+    
+    <!-- Sistema de iconos automático -->
+    <script>
+        // Mapeo inteligente de servicios a iconos
+        const serviceIconMap = {
+            'web': 'fas fa-globe',
+            'página': 'fas fa-globe',
+            'sitio': 'fas fa-globe',
+            'desarrollo': 'fas fa-code',
+            'software': 'fas fa-laptop-code',
+            'programación': 'fas fa-code',
+            'hosting': 'fas fa-server',
+            'servidor': 'fas fa-server',
+            'dominio': 'fas fa-link',
+            'ssl': 'fas fa-shield-alt',
+            'certificado': 'fas fa-certificate',
+            'seguridad': 'fas fa-shield-alt',
+            'ecommerce': 'fas fa-shopping-cart',
+            'tienda': 'fas fa-store',
+            'comercio': 'fas fa-shopping-cart',
+            'woocommerce': 'fab fa-wordpress',
+            'wordpress': 'fab fa-wordpress',
+            'correo': 'fas fa-envelope',
+            'email': 'fas fa-envelope',
+            'corporativo': 'fas fa-building',
+            'empresa': 'fas fa-building',
+            'diseño': 'fas fa-paint-brush',
+            'marketing': 'fas fa-bullhorn',
+            'seo': 'fas fa-search',
+            'analytics': 'fas fa-chart-line',
+            'base de datos': 'fas fa-database',
+            'api': 'fas fa-plug',
+            'móvil': 'fas fa-mobile-alt',
+            'app': 'fas fa-mobile-alt',
+            'cloud': 'fas fa-cloud',
+            'nube': 'fas fa-cloud',
+            'backup': 'fas fa-hdd',
+            'mantenimiento': 'fas fa-wrench',
+            'soporte': 'fas fa-life-ring',
+            'consultoría': 'fas fa-user-tie',
+            'social': 'fab fa-facebook',
+            'redes': 'fas fa-share-alt'
+        };
+        
+        function assignAutoIcons() {
+            const serviceCards = document.querySelectorAll('[data-service-name]');
+            
+            serviceCards.forEach(card => {
+                const serviceName = card.getAttribute('data-service-name').toLowerCase();
+                const iconElement = card.querySelector('.service-auto-icon');
+                
+                if (iconElement) {
+                    let assignedIcon = 'fas fa-cogs'; // Icono por defecto
+                    
+                    // Buscar coincidencias en el nombre del servicio
+                    for (const [keyword, icon] of Object.entries(serviceIconMap)) {
+                        if (serviceName.includes(keyword)) {
+                            assignedIcon = icon;
+                            break;
+                        }
+                    }
+                    
+                    // Asignar el icono
+                    iconElement.className = `service-auto-icon ${assignedIcon}`;
+                    
+                    // Agregar animación de entrada
+                    iconElement.style.animation = 'fadeInScale 0.6s ease-out';
+                }
+            });
+        }
+        
+        // Ejecutar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            assignAutoIcons();
+        });
+    </script>
+    
+    <style>
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .service-auto-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .service-auto-icon:hover {
+            transform: scale(1.1);
+            color: #ff8533 !important;
+        }
+    </style>
+</body>
+</html> 

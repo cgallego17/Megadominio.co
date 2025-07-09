@@ -1,0 +1,1742 @@
+{% extends 'adminpanel/dashboard.html' %}
+{% load static %}
+
+{% block title %}Analytics Avanzado | megadominio.co{% endblock %}
+
+{% block dashboard_active %}{% endblock %}
+{% block analytics_active %}active{% endblock %}
+
+{% block page_header %}
+<header class="page-header">
+    <div class="header-main">
+        <div class="mobile-menu-container">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1><i class="fas fa-chart-line"></i> Analytics Avanzado</h1>
+        </div>
+    </div>
+    <div class="period-selector">
+        <select onchange="changePeriod(this.value)" class="period-select">
+            <option value="7" {% if period == '7' %}selected{% endif %}>Últimos 7 días</option>
+            <option value="30" {% if period == '30' %}selected{% endif %}>Últimos 30 días</option>
+            <option value="90" {% if period == '90' %}selected{% endif %}>Últimos 90 días</option>
+        </select>
+    </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+            <!-- Resumen ejecutivo -->
+            <div class="executive-summary">
+                <div class="summary-card visits">
+                    <div class="summary-header">
+                        <div class="summary-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3>Total Visitas</h3>
+                            <div class="summary-number">{{ total_visitas }}</div>
+                            <div class="summary-detail">
+                                <i class="fas fa-mouse-pointer"></i> Trackeo real
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary-card users">
+                    <div class="summary-header">
+                        <div class="summary-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3>Visitantes Únicos</h3>
+                            <div class="summary-number">{{ visitantes_unicos }}</div>
+                            <div class="summary-detail">
+                                <i class="fas fa-user-check"></i> IPs únicas
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary-card performance">
+                    <div class="summary-header">
+                        <div class="summary-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3>Tiempo Promedio</h3>
+                            <div class="summary-number">{{ avg_session_time }}m</div>
+                            <div class="summary-detail">
+                                <i class="fas fa-hourglass-half"></i> Por sesión
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary-card engagement">
+                    <div class="summary-header">
+                        <div class="summary-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3>Tasa de Rebote</h3>
+                            <div class="summary-number">{{ bounce_rate }}%</div>
+                            <div class="summary-detail">
+                                <i class="fas fa-percentage"></i> Promedio
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de rendimiento y análisis -->
+            <div class="performance-section">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-line"></i> Rendimiento y Análisis
+                </h2>
+                <div class="performance-grid">
+                    <!-- Gráfico principal de tendencias -->
+                    <div class="chart-card primary-chart">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-chart-line"></i> Tendencia de Visitas</h3>
+                            <div class="chart-actions">
+                                <div class="chart-legend">
+                                    <span class="legend-item">
+                                        <span class="legend-color primary"></span>
+                                        Total Visitas
+                                    </span>
+                                    <span class="legend-item">
+                                        <span class="legend-color success"></span>
+                                        Visitantes Únicos
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="visitsChart"></canvas>
+                        </div>
+                        <div class="chart-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Pico máximo</div>
+                                <div class="stat-value">{{ max_visits_day }} visitas</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Promedio diario</div>
+                                <div class="stat-value">{{ avg_visits_day }} visitas</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Crecimiento</div>
+                                <div class="stat-value">+{{ growth_rate }}%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fuentes de tráfico -->
+                    <div class="chart-card traffic-sources">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-share-alt"></i> Fuentes de Tráfico</h3>
+                            <div class="chart-period">{{ period }} días</div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="trafficChart"></canvas>
+                        </div>
+                        <div class="traffic-details">
+                            <div class="traffic-item">
+                                <span class="traffic-source">
+                                    <i class="fas fa-search"></i> Búsqueda
+                                </span>
+                                <span class="traffic-percentage">45%</span>
+                            </div>
+                            <div class="traffic-item">
+                                <span class="traffic-source">
+                                    <i class="fas fa-external-link-alt"></i> Directo
+                                </span>
+                                <span class="traffic-percentage">35%</span>
+                            </div>
+                            <div class="traffic-item">
+                                <span class="traffic-source">
+                                    <i class="fas fa-share-square"></i> Social
+                                </span>
+                                <span class="traffic-percentage">20%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección geográfica mejorada -->
+            <div class="geo-section">
+                <h2 class="section-title">
+                    <i class="fas fa-globe-americas"></i> Análisis Geográfico
+                </h2>
+                <div class="geo-summary">
+                    <div class="geo-stat-card">
+                        <div class="geo-stat-icon">
+                            <i class="fas fa-flag"></i>
+                        </div>
+                        <div class="geo-stat-info">
+                            <div class="geo-stat-number">{{ stats_geograficas.total_paises }}</div>
+                            <div class="geo-stat-label">Países</div>
+                        </div>
+                    </div>
+                    <div class="geo-stat-card">
+                        <div class="geo-stat-icon">
+                            <i class="fas fa-city"></i>
+                        </div>
+                        <div class="geo-stat-info">
+                            <div class="geo-stat-number">{{ stats_geograficas.total_ciudades }}</div>
+                            <div class="geo-stat-label">Ciudades</div>
+                        </div>
+                    </div>
+                    <div class="geo-stat-card">
+                        <div class="geo-stat-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="geo-stat-info">
+                            <div class="geo-stat-number">{{ stats_geograficas.pais_top_visitas }}</div>
+                            <div class="geo-stat-label">Top País</div>
+                        </div>
+                    </div>
+                    <div class="geo-stat-card">
+                        <div class="geo-stat-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="geo-stat-info">
+                            <div class="geo-stat-number">{{ international_percentage }}%</div>
+                            <div class="geo-stat-label">Internacional</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="geo-grid">
+                    <!-- Gráfico de países -->
+                    <div class="geo-chart-card">
+                        <div class="chart-header">
+                            <h3><i class="fas fa-map-marked-alt"></i> Distribución por Países</h3>
+                            <div class="chart-info">Top 10 países</div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="countriesChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista detallada de países -->
+                    <div class="countries-detail-card">
+                        <div class="countries-header">
+                            <h3><i class="fas fa-list-ul"></i> Ranking de Países</h3>
+                            <div class="countries-actions">
+                                <span class="countries-count">{{ paises_visitantes|length }} países</span>
+                                <a href="#" class="export-link">
+                                    <i class="fas fa-download"></i> Exportar
+                                </a>
+                            </div>
+                        </div>
+                        <div class="countries-container">
+                            {% for pais in paises_visitantes %}
+                            <div class="country-item">
+                                <div class="country-rank">{{ forloop.counter }}</div>
+                                <div class="country-info">
+                                    <div class="country-flag">{{ pais.codigo|default:"🌐" }}</div>
+                                    <div class="country-details">
+                                        <div class="country-name">{{ pais.pais }}</div>
+                                        <div class="country-code">{{ pais.codigo|default:"--" }}</div>
+                                    </div>
+                                </div>
+                                <div class="country-metrics">
+                                    <div class="country-visits">
+                                        <span class="visits-number">{{ pais.visitas }}</span>
+                                        <span class="visits-label">visitas</span>
+                                    </div>
+                                    <div class="country-progress">
+                                        <div class="progress-bar" style="width: {{ pais.porcentaje }}%; background: {{ pais.color }};"></div>
+                                    </div>
+                                    <div class="country-percentage">{{ pais.porcentaje|floatformat:1 }}%</div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-state">
+                                <i class="fas fa-globe"></i>
+                                <h4>Datos geográficos en proceso</h4>
+                                <p>Los datos de visitantes aparecerán aquí automáticamente</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de páginas populares mejorada -->
+            <div class="pages-section">
+                <h2 class="section-title">
+                    <i class="fas fa-fire"></i> Páginas Más Populares
+                </h2>
+                <div class="pages-grid">
+                    <div class="pages-card">
+                        <div class="pages-header">
+                            <h3><i class="fas fa-trophy"></i> Top de Páginas</h3>
+                            <div class="pages-actions">
+                                <span class="pages-period">{{ period }} días</span>
+                                <a href="#" class="export-link">
+                                    <i class="fas fa-download"></i> Exportar
+                                </a>
+                            </div>
+                        </div>
+                        <div class="pages-container">
+                            {% for pagina in paginas_populares %}
+                            <div class="page-item">
+                                <div class="page-rank">
+                                    <div class="rank-number">{{ forloop.counter }}</div>
+                                    {% if forloop.counter == 1 %}
+                                    <div class="rank-badge gold">
+                                        <i class="fas fa-crown"></i>
+                                    </div>
+                                    {% elif forloop.counter == 2 %}
+                                    <div class="rank-badge silver">
+                                        <i class="fas fa-medal"></i>
+                                    </div>
+                                    {% elif forloop.counter == 3 %}
+                                    <div class="rank-badge bronze">
+                                        <i class="fas fa-award"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="page-info">
+                                    <div class="page-name">{{ pagina.nombre }}</div>
+                                    <div class="page-path">
+                                        <i class="fas fa-link"></i> {{ pagina.path }}
+                                    </div>
+                                </div>
+                                <div class="page-metrics">
+                                    <div class="page-visits">
+                                        <span class="visits-number">{{ pagina.visitas }}</span>
+                                        <span class="visits-label">visitas</span>
+                                    </div>
+                                    <div class="page-progress">
+                                        <div class="progress-bar" style="width: {{ pagina.porcentaje }}%"></div>
+                                    </div>
+                                    <div class="page-percentage">{{ pagina.porcentaje|floatformat:1 }}%</div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-state">
+                                <i class="fas fa-chart-line"></i>
+                                <h4>No hay datos suficientes</h4>
+                                <p>Las páginas populares aparecerán aquí cuando tengamos más datos</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if paginas_populares %}
+                        <div class="pages-summary">
+                            <div class="summary-stats">
+                                <div class="summary-stat">
+                                    <i class="fas fa-eye"></i>
+                                    <span>{{ total_page_views }} vistas totales</span>
+                                </div>
+                                <div class="summary-stat">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>{{ total_pages }} páginas únicas</span>
+                                </div>
+                                <div class="summary-stat">
+                                    <i class="fas fa-star"></i>
+                                    <span>{{ top_page_name }} es #1</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Análisis de páginas -->
+                    <div class="analysis-card">
+                        <div class="analysis-header">
+                            <h3><i class="fas fa-microscope"></i> Análisis de Contenido</h3>
+                            <div class="analysis-badge">Insights</div>
+                        </div>
+                        <div class="analysis-insights">
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-rocket"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Servicios Lideran</h4>
+                                    <p>La página de servicios es tu contenido más visitado con {{ top_service_visits }} visitas</p>
+                                </div>
+                            </div>
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-wordpress"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>WordPress Popular</h4>
+                                    <p>El interés en WordPress representa {{ wordpress_percentage }}% del tráfico</p>
+                                </div>
+                            </div>
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-globe"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Dominios en Demanda</h4>
+                                    <p>Los servicios de dominios mantienen alto engagement</p>
+                                </div>
+                            </div>
+                            <div class="insight-item">
+                                <div class="insight-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4>Contacto Efectivo</h4>
+                                    <p>Tu página de contacto genera {{ contact_conversion }}% de conversiones</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="analysis-actions">
+                            <a href="#" class="insight-action">
+                                <i class="fas fa-chart-pie"></i> Ver análisis completo
+                            </a>
+                            <a href="#" class="insight-action">
+                                <i class="fas fa-lightbulb"></i> Recomendaciones
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos detallados -->
+            <div class="details-grid">
+                <!-- Resumen técnico -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <h3><i class="fas fa-cogs"></i> Resumen Técnico</h3>
+                        <span class="data-badge">Sistema</span>
+                    </div>
+                    <div class="tech-summary">
+                        <div class="tech-item">
+                            <div class="tech-label">Middleware Analytics</div>
+                            <div class="tech-value">
+                                <span class="status-active">
+                                    <i class="fas fa-circle"></i> Activo
+                                </span>
+                            </div>
+                        </div>
+                        <div class="tech-item">
+                            <div class="tech-label">Geolocalización</div>
+                            <div class="tech-value">
+                                <span class="status-active">
+                                    <i class="fas fa-globe"></i> ipapi.co
+                                </span>
+                            </div>
+                        </div>
+                        <div class="tech-item">
+                            <div class="tech-label">Tracking IPs</div>
+                            <div class="tech-value">{{ visitantes_unicos }} únicas</div>
+                        </div>
+                        <div class="tech-item">
+                            <div class="tech-label">Período análisis</div>
+                            <div class="tech-value">{{ period }} días</div>
+                        </div>
+                        <div class="tech-item">
+                            <div class="tech-label">Última actualización</div>
+                            <div class="tech-value">
+                                <i class="fas fa-sync"></i> En tiempo real
+                            </div>
+                        </div>
+                        <div class="tech-item">
+                            <div class="tech-label">Base de datos</div>
+                            <div class="tech-value">{{ total_records }} registros</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones rápidas -->
+                <div class="quick-actions-card">
+                    <div class="actions-header">
+                        <h3><i class="fas fa-bolt"></i> Acciones Rápidas</h3>
+                        <div class="actions-badge">Herramientas</div>
+                    </div>
+                    <div class="actions-grid">
+                        <a href="{% url 'adminpanel:admin_dashboard' %}" class="action-item dashboard">
+                            <div class="action-icon">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <div class="action-content">
+                                <span class="action-title">Dashboard</span>
+                                <span class="action-subtitle">Vista general</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'adminpanel:contactos_list' %}" class="action-item contacts">
+                            <div class="action-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="action-content">
+                                <span class="action-title">Contactos</span>
+                                <span class="action-subtitle">{{ total_contactos }} registros</span>
+                            </div>
+                        </a>
+                        <a href="{% url 'adminpanel:servicios_list' %}" class="action-item services">
+                            <div class="action-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="action-content">
+                                <span class="action-title">Servicios</span>
+                                <span class="action-subtitle">{{ total_servicios }} activos</span>
+                            </div>
+                        </a>
+                        <a href="#" class="action-item export">
+                            <div class="action-icon">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <div class="action-content">
+                                <span class="action-title">Exportar</span>
+                                <span class="action-subtitle">Datos completos</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+    <script>
+        // Datos del backend
+        const analyticsData = {
+            fechas: {{ fechas|safe }},
+            visitas: {{ visitas|safe }},
+            visitantes_unicos: {{ visitas_unicas_data|safe }},
+            fuentes_labels: {{ fuentes_labels|safe }},
+            fuentes_data: {{ fuentes_data|safe }},
+            fuentes_colors: {{ fuentes_colors|safe }},
+            paises_labels: {{ paises_labels|safe }},
+            paises_data: {{ paises_data|safe }},
+            paises_colors: {{ paises_colors|safe }}
+        };
+
+        // Gráfico de tendencia de visitas
+        const visitsCtx = document.getElementById('visitsChart').getContext('2d');
+        const visitsChart = new Chart(visitsCtx, {
+            type: 'line',
+            data: {
+                labels: analyticsData.fechas,
+                datasets: [{
+                    label: 'Total Visitas',
+                    data: analyticsData.visitas,
+                    borderColor: '#ff6600',
+                    backgroundColor: 'rgba(255, 102, 0, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Visitantes Únicos',
+                    data: analyticsData.visitantes_unicos,
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 2.5,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#cccccc'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#cccccc'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de fuentes de tráfico
+        const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+        const trafficChart = new Chart(trafficCtx, {
+            type: 'doughnut',
+            data: {
+                labels: analyticsData.fuentes_labels,
+                datasets: [{
+                    data: analyticsData.fuentes_data,
+                    backgroundColor: analyticsData.fuentes_colors,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 1.2,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#cccccc'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de países
+        const countriesCtx = document.getElementById('countriesChart').getContext('2d');
+        const countriesChart = new Chart(countriesCtx, {
+            type: 'bar',
+            data: {
+                labels: analyticsData.paises_labels,
+                datasets: [{
+                    label: 'Visitas',
+                    data: analyticsData.paises_data,
+                    backgroundColor: analyticsData.paises_colors,
+                    borderWidth: 0,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 1.2,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#cccccc'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#cccccc'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Función para cambiar período
+        function changePeriod(period) {
+            window.location.href = `?period=${period}`;
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        }
+        
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+        
+        // Close mobile menu
+        function closeMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+    </script>
+
+    <style>
+        /* Variables CSS para consistencia */
+        :root {
+            --primary-color: #ff6600;
+            --primary-light: #ff8533;
+            --primary-dark: #cc5200;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --dark-color: #1e1e1e;
+            --light-color: #ffffff;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #999999;
+            --background-dark: #121212;
+            --background-card: #1e1e1e;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Estilos generales del contenedor */
+        .analytics-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section-title {
+            color: var(--text-primary);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        /* Resumen ejecutivo */
+        .executive-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+        }
+
+        .summary-card.users::before {
+            background: linear-gradient(90deg, var(--success-color), #40dd5a);
+        }
+
+        .summary-card.performance::before {
+            background: linear-gradient(90deg, var(--info-color), #3bc4db);
+        }
+
+        .summary-card.engagement::before {
+            background: linear-gradient(90deg, var(--warning-color), #ffdb4a);
+        }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .summary-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .summary-card.users .summary-icon {
+            background: linear-gradient(135deg, var(--success-color), #40dd5a);
+        }
+
+        .summary-card.performance .summary-icon {
+            background: linear-gradient(135deg, var(--info-color), #3bc4db);
+        }
+
+        .summary-card.engagement .summary-icon {
+            background: linear-gradient(135deg, var(--warning-color), #ffdb4a);
+        }
+
+        .summary-info h3 {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .summary-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-card.users .summary-number {
+            color: var(--success-color);
+        }
+
+        .summary-card.performance .summary-number {
+            color: var(--info-color);
+        }
+
+        .summary-card.engagement .summary-number {
+            color: var(--warning-color);
+        }
+
+        .summary-detail {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Sección de rendimiento */
+        .performance-section {
+            background: var(--background-card);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 3rem;
+        }
+
+        .performance-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .chart-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-header h3 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-color.primary {
+            background: var(--primary-color);
+        }
+
+        .legend-color.success {
+            background: var(--success-color);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding: 0.7rem 0;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.03);
+            border-radius: 0 0 12px 12px;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chart-period {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .traffic-details {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .traffic-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+
+        .traffic-source {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .traffic-percentage {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Sección de páginas populares */
+        .pages-section {
+            background: var(--background-card);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 3rem;
+        }
+
+        .pages-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .pages-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .pages-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .pages-header h3 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .pages-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .pages-period {
+            background: linear-gradient(135deg, var(--info-color), #3bc4db);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .export-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .export-link:hover {
+            color: var(--primary-light);
+        }
+
+        .pages-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .page-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .page-item:hover {
+            background: rgba(255, 102, 0, 0.08);
+            border-color: rgba(255, 102, 0, 0.2);
+        }
+
+        .page-rank {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 60px;
+        }
+
+        .rank-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            width: 30px;
+            text-align: center;
+        }
+
+        .rank-badge {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .rank-badge.gold {
+            background: linear-gradient(135deg, #ffd700, #ffed4a);
+            color: #b8860b;
+        }
+
+        .rank-badge.silver {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+            color: #666;
+        }
+
+        .rank-badge.bronze {
+            background: linear-gradient(135deg, #cd7f32, #d4a574);
+            color: #8b4513;
+        }
+
+        .page-info {
+            flex: 1;
+        }
+
+        .page-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .page-path {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .page-metrics {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 200px;
+        }
+
+        .page-visits {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+
+        .visits-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .visits-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .page-progress {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            border-radius: 2px;
+            transition: width 0.8s ease;
+        }
+
+        .page-percentage {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .pages-summary {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .summary-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .summary-stat i {
+            color: var(--primary-color);
+        }
+
+        /* Análisis de contenido */
+        .analysis-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .analysis-header h3 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .analysis-badge {
+            background: linear-gradient(135deg, var(--success-color), #40dd5a);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .analysis-insights {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .insight-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .insight-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .insight-content h4 {
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .insight-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .analysis-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .insight-action {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1rem;
+            background: linear-gradient(135deg, rgba(255, 102, 0, 0.1), rgba(255, 102, 0, 0.05));
+            border: 1px solid rgba(255, 102, 0, 0.3);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .insight-action:hover {
+            background: linear-gradient(135deg, rgba(255, 102, 0, 0.2), rgba(255, 102, 0, 0.1));
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Sección geográfica */
+        .geo-section {
+            background: var(--background-card);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 3rem;
+        }
+
+        .geo-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .geo-stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .geo-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .geo-stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .geo-stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.3rem;
+        }
+
+        .geo-stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .geo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .geo-chart-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .countries-detail-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .countries-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .countries-header h3 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .countries-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .countries-count {
+            background: linear-gradient(135deg, var(--info-color), #3bc4db);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .countries-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .country-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .country-item:last-child {
+            border-bottom: none;
+        }
+
+        .country-rank {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .country-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .country-flag {
+            font-size: 1.5rem;
+            width: 40px;
+            text-align: center;
+        }
+
+        .country-name {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .country-code {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .country-metrics {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 200px;
+        }
+
+        .country-visits {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+
+        .country-progress {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .country-percentage {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* Datos detallados */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .detail-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .detail-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-header h3 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .data-badge {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tech-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .tech-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .tech-item:last-child {
+            border-bottom: none;
+        }
+
+        .tech-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .tech-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-active {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        /* Acciones rápidas */
+        .quick-actions-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .actions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .actions-header h3 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .actions-badge {
+            background: linear-gradient(135deg, var(--success-color), #40dd5a);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .action-item:hover {
+            background: rgba(255, 102, 0, 0.1);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .action-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .action-item.dashboard .action-icon {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        }
+
+        .action-item.contacts .action-icon {
+            background: linear-gradient(135deg, var(--info-color), #3bc4db);
+        }
+
+        .action-item.services .action-icon {
+            background: linear-gradient(135deg, var(--success-color), #40dd5a);
+        }
+
+        .action-item.export .action-icon {
+            background: linear-gradient(135deg, var(--warning-color), #ffdb4a);
+        }
+
+        .action-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .action-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .action-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Estados vacíos */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state h4 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .performance-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pages-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .geo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .analytics-container {
+                padding: 1rem;
+            }
+            
+            .executive-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .geo-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .page-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .page-metrics {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .country-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .country-metrics {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block extra_js %}{{ block.super }}{% endblock %} 

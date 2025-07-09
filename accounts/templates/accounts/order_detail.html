@@ -1,0 +1,813 @@
+{% extends 'accounts/client_base.html' %}
+{% load static %}
+{% load service_extras %}
+
+{% block title %}Orden #{{ order.order_number }} - Megadominio.co{% endblock %}
+
+{% block extra_css %}
+<style>
+    .order-header {
+        background: linear-gradient(135deg, #ff6b35, #ff8c42);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+    }
+    
+    .status-pending {
+        background-color: #ffc107;
+        color: #000;
+    }
+    
+    .status-processing {
+        background-color: #17a2b8;
+        color: #fff;
+    }
+    
+    .status-completed {
+        background-color: #28a745;
+        color: #fff;
+    }
+    
+    .status-cancelled {
+        background-color: #dc3545;
+        color: #fff;
+    }
+    
+    .status-failed {
+        background-color: #6c757d;
+        color: #fff;
+    }
+    
+    .order-section {
+        background-color: #2d2d2d;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #ff6b35;
+    }
+    
+    .order-item {
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid #404040;
+    }
+    
+    .order-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .payment-info {
+        background: linear-gradient(135deg, #2d2d2d, #1a1a1a);
+        border: 1px solid #ff6b35;
+        border-radius: 10px;
+        padding: 1.5rem;
+    }
+    
+    .total-summary {
+        background: linear-gradient(135deg, #ff6b35, #ff8c42);
+        border-radius: 10px;
+        padding: 1.5rem;
+        color: white;
+        margin-top: 1rem;
+    }
+    
+    .btn-action {
+        background: linear-gradient(135deg, #ff6b35, #ff8c42);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-action:hover {
+        background: linear-gradient(135deg, #ff8c42, #ffab73);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        color: white;
+    }
+    
+    .btn-secondary-custom {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary-custom:hover {
+        background: linear-gradient(135deg, #5a6268, #495057);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .transaction-status {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .transaction-approved {
+        background-color: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid #28a745;
+    }
+    
+    .transaction-pending {
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid #ffc107;
+    }
+    
+    .transaction-declined {
+        background-color: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+        border: 1px solid #dc3545;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #404040;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        color: #cccccc;
+        font-weight: 500;
+    }
+    
+    .info-value {
+        color: #ffffff;
+        font-weight: 600;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.5rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #ff6b35;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -1.5rem;
+        top: 0.5rem;
+        width: 12px;
+        height: 12px;
+        background-color: #ff6b35;
+        border-radius: 50%;
+        border: 2px solid #2d2d2d;
+    }
+    
+    .timeline-content {
+        background-color: #1a1a1a;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #404040;
+    }
+    
+    .payment-method-option {
+        background-color: #1a1a1a;
+        border: 1px solid #404040;
+        border-radius: 8px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .payment-method-option:hover {
+        border-color: #ff6b35;
+        background-color: rgba(255, 107, 53, 0.1);
+    }
+    
+    .payment-method-option input[type="radio"]:checked + label {
+        color: #ff6b35;
+    }
+    
+    #retryPaymentModal .form-control,
+    #retryPaymentModal .form-select {
+        background-color: #1a1a1a;
+        border: 1px solid #404040;
+        color: #ffffff;
+    }
+    
+    #retryPaymentModal .form-control:focus,
+    #retryPaymentModal .form-select:focus {
+        background-color: #1a1a1a;
+        border-color: #ff6b35;
+        box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.25);
+        color: #ffffff;
+    }
+    
+    #retryPaymentModal .form-check-input {
+        background-color: #1a1a1a;
+        border: 2px solid #404040;
+    }
+    
+    #retryPaymentModal .form-check-input:checked {
+        background-color: #ff6b35;
+        border-color: #ff6b35;
+    }
+    
+    #retryPaymentModal .form-check-input:focus {
+        border-color: #ff6b35;
+        box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Indicador de Moneda -->
+    {% if user_currency %}
+    <div class="row mb-4">
+        <div class="col-12">
+            {% show_currency_indicator user_country user_currency %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Header de la Orden -->
+    <div class="order-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="fas fa-receipt me-3"></i>
+                    Orden #{{ order.order_number }}
+                </h1>
+                <p class="mb-0 opacity-75">
+                    <i class="fas fa-calendar me-2"></i>
+                    Creada el {{ order.created_at|date:"d/m/Y H:i" }}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <span class="status-badge status-{{ order.status }}">
+                    {% if order.status == 'pending' %}
+                        <i class="fas fa-clock me-1"></i>Pendiente
+                    {% elif order.status == 'processing' %}
+                        <i class="fas fa-cog fa-spin me-1"></i>Procesando
+                    {% elif order.status == 'completed' %}
+                        <i class="fas fa-check-circle me-1"></i>Completada
+                    {% elif order.status == 'cancelled' %}
+                        <i class="fas fa-times-circle me-1"></i>Cancelada
+                    {% elif order.status == 'failed' %}
+                        <i class="fas fa-exclamation-triangle me-1"></i>Fallida
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información Principal -->
+        <div class="col-lg-8">
+            <!-- Items de la Orden -->
+            <div class="order-section">
+                <h4 class="text-white mb-4">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    Servicios Solicitados
+                </h4>
+                
+                {% for item in order.items.all %}
+                <div class="order-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h6 class="text-white mb-1">{{ item.service_name }}</h6>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-sync me-1"></i>
+                                {{ item.get_billing_cycle_display }}
+                            </p>
+                            {% if item.domain_name %}
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-globe me-1"></i>
+                                Dominio: {{ item.domain_name }}
+                            </p>
+                            {% endif %}
+                            {% if item.notes %}
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-sticky-note me-1"></i>
+                                {{ item.notes }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <span class="text-white">{{ item.quantity }}</span>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <span class="text-white">{{ item.unit_formatted }}</span>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <span class="text-orange fw-bold">{{ item.total_formatted }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Información de Facturación -->
+            <div class="order-section">
+                <h4 class="text-white mb-4">
+                    <i class="fas fa-user me-2"></i>
+                    Información de Facturación
+                </h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <span class="info-label">Nombre:</span>
+                            <span class="info-value">{{ order.billing_name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Email:</span>
+                            <span class="info-value">{{ order.billing_email }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <span class="info-label">Dirección:</span>
+                            <span class="info-value">{{ order.billing_address|default:"No especificada" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Pago -->
+            {% if order.wompi_transaction %}
+            <div class="order-section">
+                <h4 class="text-white mb-4">
+                    <i class="fas fa-credit-card me-2"></i>
+                    Información de Pago
+                </h4>
+                
+                <div class="payment-info">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <span class="info-label">Método de Pago:</span>
+                                <span class="info-value">{{ order.wompi_transaction.get_payment_method_display }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">ID de Transacción:</span>
+                                <span class="info-value">{{ order.wompi_transaction.wompi_id }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Referencia:</span>
+                                <span class="info-value">{{ order.wompi_transaction.reference }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <span class="info-label">Estado del Pago:</span>
+                                <span class="transaction-status transaction-{{ order.wompi_transaction.status|lower }}">
+                                    {% if order.wompi_transaction.status == 'APPROVED' %}
+                                        <i class="fas fa-check-circle me-1"></i>Aprobado
+                                    {% elif order.wompi_transaction.status == 'PENDING' %}
+                                        <i class="fas fa-clock me-1"></i>Pendiente
+                                    {% elif order.wompi_transaction.status == 'DECLINED' %}
+                                        <i class="fas fa-times-circle me-1"></i>Rechazado
+                                    {% else %}
+                                        {{ order.wompi_transaction.get_status_display }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Fecha de Pago:</span>
+                                <span class="info-value">
+                                    {% if order.wompi_transaction.paid_at %}
+                                        {{ order.wompi_transaction.paid_at|date:"d/m/Y H:i" }}
+                                    {% else %}
+                                        Pendiente
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Historial de la Orden -->
+            <div class="order-section">
+                <h4 class="text-white mb-4">
+                    <i class="fas fa-history me-2"></i>
+                    Historial de la Orden
+                </h4>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h6 class="text-white mb-1">Orden Creada</h6>
+                            <p class="text-muted mb-0">{{ order.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if order.wompi_transaction %}
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h6 class="text-white mb-1">Transacción Iniciada</h6>
+                            <p class="text-muted mb-0">{{ order.wompi_transaction.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if order.wompi_transaction.paid_at %}
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h6 class="text-white mb-1">Pago Procesado</h6>
+                            <p class="text-muted mb-0">{{ order.wompi_transaction.paid_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    
+                    {% if order.status == 'completed' %}
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <h6 class="text-white mb-1">Orden Completada</h6>
+                            <p class="text-muted mb-0">{{ order.updated_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen y Acciones -->
+        <div class="col-lg-4">
+            <!-- Resumen de Totales -->
+            <div class="order-section">
+                <h5 class="text-white mb-4">
+                    <i class="fas fa-calculator me-2"></i>
+                    Resumen de Totales
+                </h5>
+                
+                <div class="info-item">
+                    <span class="info-label">Subtotal:</span>
+                    <span class="info-value">{{ order.subtotal_formatted }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Impuestos:</span>
+                    <span class="info-value">{{ order.tax_formatted }}</span>
+                </div>
+                
+                <div class="total-summary mt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fs-5 fw-bold">Total:</span>
+                        <span class="fs-4 fw-bold">{{ order.total_formatted }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="order-section">
+                <h5 class="text-white mb-4">
+                    <i class="fas fa-tools me-2"></i>
+                    Acciones
+                </h5>
+                
+                <div class="d-grid gap-2">
+                    {% if order.status == 'pending' and order.wompi_transaction %}
+                        {% if order.wompi_transaction.status == 'PENDING' %}
+                        <button class="btn btn-action" onclick="checkPaymentStatus()">
+                            <i class="fas fa-sync me-2"></i>
+                            Verificar Estado del Pago
+                        </button>
+                        {% elif order.wompi_transaction.status == 'DECLINED' %}
+                        <button class="btn btn-action" onclick="showRetryPaymentModal()">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Intentar Pago Nuevamente
+                        </button>
+                        {% endif %}
+                    {% elif order.status == 'pending' or order.status == 'failed' %}
+                        <button class="btn btn-action" onclick="showRetryPaymentModal()">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Pagar Orden
+                        </button>
+                    {% endif %}
+                    
+                    <a href="{% url 'accounts:my_orders' %}" class="btn btn-secondary-custom">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Volver a Mis Órdenes
+                    </a>
+                    
+                    <button class="btn btn-secondary-custom" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>
+                        Imprimir Orden
+                    </button>
+                </div>
+            </div>
+
+            <!-- Información de Contacto -->
+            <div class="order-section">
+                <h5 class="text-white mb-4">
+                    <i class="fas fa-headset me-2"></i>
+                    ¿Necesitas Ayuda?
+                </h5>
+                
+                <p class="text-muted mb-3">
+                    Si tienes alguna pregunta sobre tu orden, no dudes en contactarnos:
+                </p>
+                
+                <div class="info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">soporte@megadominio.co</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Teléfono:</span>
+                    <span class="info-value">+57 (1) 234-5678</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Re-pago -->
+<div class="modal fade" id="retryPaymentModal" tabindex="-1" aria-labelledby="retryPaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color: #2d2d2d; border: 2px solid #ff6b35;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #ff6b35, #ff8c42); border-bottom: 2px solid #ff6b35;">
+                <h5 class="modal-title text-white" id="retryPaymentModalLabel">
+                    <i class="fas fa-credit-card me-2"></i>
+                    Pagar Orden #{{ order.order_number }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+            </div>
+            <div class="modal-body" style="background-color: #2d2d2d;">
+                <form id="retryPaymentForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <h6 class="text-white mb-3">Selecciona el método de pago:</h6>
+                        
+                        <!-- Tarjeta de Crédito/Débito -->
+                        <div class="form-check payment-method-option mb-3">
+                            <input class="form-check-input" type="radio" name="wompi_payment_method" id="card_method" value="CARD" checked>
+                            <label class="form-check-label text-white" for="card_method">
+                                <i class="fas fa-credit-card me-2"></i>
+                                Tarjeta de Crédito/Débito
+                            </label>
+                        </div>
+                        
+                        <!-- PSE -->
+                        <div class="form-check payment-method-option mb-3">
+                            <input class="form-check-input" type="radio" name="wompi_payment_method" id="pse_method" value="PSE">
+                            <label class="form-check-label text-white" for="pse_method">
+                                <i class="fas fa-university me-2"></i>
+                                PSE - Débito desde cuenta bancaria
+                            </label>
+                        </div>
+                        
+                        <!-- Nequi -->
+                        <div class="form-check payment-method-option mb-3">
+                            <input class="form-check-input" type="radio" name="wompi_payment_method" id="nequi_method" value="NEQUI">
+                            <label class="form-check-label text-white" for="nequi_method">
+                                <i class="fas fa-mobile-alt me-2"></i>
+                                Nequi
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Campos específicos para PSE -->
+                    <div id="pse_fields" style="display: none;">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="pse_bank" class="form-label text-white">Banco:</label>
+                                <select class="form-select" id="pse_bank" name="pse_bank">
+                                    <option value="">Selecciona tu banco</option>
+                                    <!-- Los bancos se cargarán dinámicamente -->
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="pse_id_number" class="form-label text-white">Número de Identificación:</label>
+                                <input type="text" class="form-control" id="pse_id_number" name="pse_id_number">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Campos específicos para Nequi -->
+                    <div id="nequi_fields" style="display: none;">
+                        <div class="mb-3">
+                            <label for="nequi_phone" class="form-label text-white">Número de celular Nequi:</label>
+                            <input type="tel" class="form-control" id="nequi_phone" name="nequi_phone" placeholder="3001234567">
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 140, 66, 0.1)); border: 1px solid #ff6b35; color: #ffffff;">
+                        <i class="fas fa-info-circle me-2" style="color: #ff6b35;"></i>
+                        <strong style="color: #ff6b35;">Total a pagar:</strong> ${{ order.total_amount }}
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="background-color: #2d2d2d; border-top: 2px solid #ff6b35;">
+                <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-action" onclick="processRetryPayment()">
+                    <i class="fas fa-credit-card me-2"></i>
+                    Procesar Pago
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let pseBanks = [];
+
+function checkPaymentStatus() {
+    {% if order.wompi_transaction %}
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    // Mostrar loading
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Verificando...';
+    
+    fetch('{% url "accounts:wompi_transaction_status" order.wompi_transaction.wompi_id %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'APPROVED') {
+                // Recargar página para mostrar el estado actualizado
+                location.reload();
+            } else {
+                alert('El pago aún está pendiente. Te notificaremos cuando sea procesado.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al verificar el estado del pago. Por favor, intenta nuevamente.');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+    {% endif %}
+}
+
+function showRetryPaymentModal() {
+    // Cargar bancos PSE si no están cargados
+    if (pseBanks.length === 0) {
+        loadPseBanks();
+    }
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('retryPaymentModal'));
+    modal.show();
+}
+
+function loadPseBanks() {
+    fetch('{% url "accounts:wompi_payment_methods" %}')
+        .then(response => response.json())
+        .then(data => {
+            pseBanks = data.pse_banks || [];
+            
+            // Llenar select de bancos
+            const bankSelect = document.getElementById('pse_bank');
+            bankSelect.innerHTML = '<option value="">Selecciona tu banco</option>';
+            
+            pseBanks.forEach(bank => {
+                const option = document.createElement('option');
+                option.value = bank.financial_institution_code;
+                option.textContent = bank.financial_institution_name;
+                bankSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error cargando bancos PSE:', error);
+        });
+}
+
+function processRetryPayment() {
+    const form = document.getElementById('retryPaymentForm');
+    const formData = new FormData(form);
+    
+    const paymentMethod = formData.get('wompi_payment_method');
+    
+    // Validaciones específicas
+    if (paymentMethod === 'PSE') {
+        const bank = formData.get('pse_bank');
+        const idNumber = formData.get('pse_id_number');
+        
+        if (!bank || !idNumber) {
+            alert('Por favor, completa todos los campos requeridos para PSE.');
+            return;
+        }
+    } else if (paymentMethod === 'NEQUI') {
+        const phone = formData.get('nequi_phone');
+        
+        if (!phone) {
+            alert('Por favor, ingresa tu número de celular Nequi.');
+            return;
+        }
+    }
+    
+    // Mostrar loading
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+    
+    // Enviar solicitud
+    fetch('{% url "accounts:retry_payment" order.order_number %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('retryPaymentModal'));
+            modal.hide();
+            
+            if (data.payment_url) {
+                // Redireccionar a Wompi
+                window.location.href = data.payment_url;
+            } else if (data.redirect_url) {
+                // Redireccionar a la página de orden
+                window.location.href = data.redirect_url;
+            } else {
+                // Recargar página actual
+                location.reload();
+            }
+        } else {
+            alert('Error: ' + (data.error || 'Error desconocido'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al procesar el pago. Por favor, intenta nuevamente.');
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+// Manejar cambios en métodos de pago
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethodRadios = document.querySelectorAll('input[name="wompi_payment_method"]');
+    
+    paymentMethodRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Ocultar todos los campos específicos
+            document.getElementById('pse_fields').style.display = 'none';
+            document.getElementById('nequi_fields').style.display = 'none';
+            
+            // Mostrar campos específicos del método seleccionado
+            if (this.value === 'PSE') {
+                document.getElementById('pse_fields').style.display = 'block';
+            } else if (this.value === 'NEQUI') {
+                document.getElementById('nequi_fields').style.display = 'block';
+            }
+        });
+    });
+});
+
+// Auto-refresh para órdenes pendientes
+{% if order.status == 'pending' %}
+setInterval(function() {
+    checkPaymentStatus();
+}, 30000); // Verificar cada 30 segundos
+{% endif %}
+</script>
+{% endblock %}

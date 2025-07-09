@@ -1,0 +1,320 @@
+{% extends 'adminpanel/dashboard.html' %}
+{% load static %}
+
+{% block title %}Crear Servicio | megadominio.co{% endblock %}
+
+{% block servicios_active %}active{% endblock %}
+
+{% block content %}
+<!-- Header específico para crear servicio -->
+<header class="page-header">
+    <div>
+        <div class="mobile-menu-container">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1><i class="fas fa-plus-circle"></i> Crear Nuevo Servicio</h1>
+        </div>
+        <p>Agrega un nuevo servicio a tu catálogo empresarial</p>
+    </div>
+    <div class="header-info">
+        <div class="breadcrumb">
+            <a href="{% url 'adminpanel:admin_dashboard' %}">Dashboard</a>
+            <span>></span>
+            <a href="{% url 'adminpanel:servicios_home_list' %}">Servicios del Home</a>
+            <span>></span>
+            <span>Crear Servicio</span>
+        </div>
+    </div>
+</header>
+
+<div class="dashboard-container">
+            <div class="form-container">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="id_nombre" class="form-label">
+                            <i class="fas fa-tag"></i> Nombre del Servicio
+                        </label>
+                        <input type="text" 
+                               id="id_nombre" 
+                               name="nombre" 
+                               class="form-input" 
+                               placeholder="Ej: Desarrollo Web, Hosting, Diseño Gráfico..." 
+                               required>
+                        <div class="help-text">
+                            <i class="fas fa-info-circle"></i>
+                            El icono se asignará automáticamente basándose en el nombre del servicio
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_descripcion_corta" class="form-label">
+                            <i class="fas fa-align-left"></i> Descripción Corta
+                        </label>
+                        <textarea id="id_descripcion_corta" 
+                                  name="descripcion_corta" 
+                                  class="form-input form-textarea" 
+                                  rows="2"
+                                  placeholder="Una descripción breve para mostrar en listas y tarjetas..."></textarea>
+                        <div class="help-text">
+                            <i class="fas fa-lightbulb"></i>
+                            Una descripción breve para mostrar en listas y tarjetas
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_descripcion" class="form-label">
+                            <i class="fas fa-align-left"></i> Descripción Completa
+                        </label>
+                        <textarea id="id_descripcion" 
+                                  name="descripcion" 
+                                  class="form-input form-textarea" 
+                                  placeholder="Describe detalladamente tu servicio, beneficios y características..." 
+                                  required></textarea>
+                        <div class="help-text">
+                            <i class="fas fa-lightbulb"></i>
+                            Una descripción clara ayuda a los visitantes a entender tu servicio
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_precio" class="form-label">
+                            <i class="fas fa-dollar-sign"></i> Precio (Opcional)
+                        </label>
+                        <input type="text" 
+                               id="id_precio" 
+                               name="precio" 
+                               class="form-input" 
+                               placeholder="Ej: $999 pesos, Desde $500, Cotización personalizada...">
+                        <div class="help-text">
+                            <i class="fas fa-calculator"></i>
+                            Puedes indicar precios fijos, rangos o mencionar que es bajo cotización
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_imagen" class="form-label">
+                            <i class="fas fa-image"></i> Imagen Personalizada (Opcional)
+                        </label>
+                        <input type="file" 
+                               id="id_imagen" 
+                               name="imagen" 
+                               class="form-input file-input" 
+                               accept="image/*">
+                        <div class="help-text">
+                            <i class="fas fa-upload"></i>
+                            Si subes una imagen, se usará en lugar del icono automático. Formatos recomendados: SVG, PNG
+                        </div>
+                    </div>
+                    
+                    <!-- Preview del icono automático -->
+                    <div class="auto-icon-preview" style="display: none;">
+                        <h4 style="color: var(--text-primary); margin-bottom: 1rem;">
+                            <i class="fas fa-magic"></i> Vista Previa del Icono
+                        </h4>
+                        <div class="preview-container">
+                            <div class="service-icon" id="iconPreview">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-primary); font-weight: 600;" id="iconName">Servicio General</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;" id="iconClass">fas fa-cogs</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Crear Servicio
+                        </button>
+                        <a href="{% url 'adminpanel:servicios_home_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // Toggle sidebar
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        }
+        
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+        
+        // Close mobile menu
+        function closeMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+        
+        // Función para asignar iconos automáticamente
+        function getAutoIcon(serviceName) {
+            const name = serviceName.toLowerCase();
+            
+            // Mapeo de palabras clave a iconos
+            const iconMap = {
+                'web': { icon: 'fas fa-globe', name: 'Páginas Web' },
+                'página': { icon: 'fas fa-globe', name: 'Páginas Web' },
+                'sitio': { icon: 'fas fa-globe', name: 'Páginas Web' },
+                'desarrollo': { icon: 'fas fa-code', name: 'Desarrollo' },
+                'programación': { icon: 'fas fa-code', name: 'Desarrollo' },
+                'código': { icon: 'fas fa-code', name: 'Desarrollo' },
+                'ecommerce': { icon: 'fas fa-shopping-cart', name: 'Ecommerce' },
+                'tienda': { icon: 'fas fa-shopping-cart', name: 'Ecommerce' },
+                'venta': { icon: 'fas fa-shopping-cart', name: 'Ecommerce' },
+                'email': { icon: 'fas fa-envelope', name: 'Email' },
+                'correo': { icon: 'fas fa-envelope', name: 'Email' },
+                'hosting': { icon: 'fas fa-server', name: 'Hosting' },
+                'servidor': { icon: 'fas fa-server', name: 'Hosting' },
+                'ssl': { icon: 'fas fa-lock', name: 'Seguridad SSL' },
+                'seguridad': { icon: 'fas fa-shield-alt', name: 'Seguridad' },
+                'wordpress': { icon: 'fab fa-wordpress', name: 'WordPress' },
+                'woocommerce': { icon: 'fab fa-woocommerce', name: 'WooCommerce' },
+                'móvil': { icon: 'fas fa-mobile-alt', name: 'Apps Móviles' },
+                'app': { icon: 'fas fa-mobile-alt', name: 'Apps Móviles' },
+                'diseño': { icon: 'fas fa-paint-brush', name: 'Diseño' },
+                'gráfico': { icon: 'fas fa-paint-brush', name: 'Diseño Gráfico' },
+                'marketing': { icon: 'fas fa-chart-line', name: 'Marketing' },
+                'seo': { icon: 'fas fa-search', name: 'SEO' },
+                'base': { icon: 'fas fa-database', name: 'Base de Datos' },
+                'datos': { icon: 'fas fa-database', name: 'Base de Datos' },
+                'cloud': { icon: 'fas fa-cloud', name: 'Cloud' },
+                'nube': { icon: 'fas fa-cloud', name: 'Cloud' },
+                'soporte': { icon: 'fas fa-headset', name: 'Soporte' },
+                'ayuda': { icon: 'fas fa-headset', name: 'Soporte' },
+                'consultoría': { icon: 'fas fa-user-tie', name: 'Consultoría' },
+                'asesoría': { icon: 'fas fa-user-tie', name: 'Asesoría' }
+            };
+            
+            // Buscar coincidencias
+            for (const [keyword, iconData] of Object.entries(iconMap)) {
+                if (name.includes(keyword)) {
+                    return iconData;
+                }
+            }
+            
+            // Icono por defecto
+            return { icon: 'fas fa-cogs', name: 'Servicio General' };
+        }
+        
+        // Actualizar preview del icono cuando cambia el nombre
+        document.getElementById('id_nombre').addEventListener('input', function() {
+            const serviceName = this.value;
+            const preview = document.querySelector('.auto-icon-preview');
+            
+            if (serviceName.trim()) {
+                const iconData = getAutoIcon(serviceName);
+                
+                // Actualizar preview
+                document.getElementById('iconPreview').innerHTML = `<i class="${iconData.icon}"></i>`;
+                document.getElementById('iconName').textContent = iconData.name;
+                document.getElementById('iconClass').textContent = iconData.icon;
+                
+                preview.style.display = 'block';
+                preview.style.animation = 'slideIn 0.3s ease-out';
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+        
+        // Enviar el icono automático con el formulario
+        document.querySelector('form').addEventListener('submit', function() {
+            const serviceName = document.getElementById('id_nombre').value;
+            const iconData = getAutoIcon(serviceName);
+            
+            // Crear input hidden para el icono
+            const iconInput = document.createElement('input');
+            iconInput.type = 'hidden';
+            iconInput.name = 'icono';
+            iconInput.value = iconData.icon;
+            
+            this.appendChild(iconInput);
+        });
+    </script>
+    
+    <style>
+        .preview-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 102, 0, 0.2);
+        }
+        
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border-radius: 15px;
+            flex-shrink: 0;
+        }
+        
+        .service-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .auto-icon-preview {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .file-input {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed var(--glass-border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .file-input:hover {
+            border-color: var(--primary-color);
+            background: rgba(255, 102, 0, 0.05);
+        }
+        
+        .form-label i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        .help-text i {
+            margin-right: 0.25rem;
+            color: var(--primary-color);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+{% endblock %} 
+{% block extra_js %}{{ block.super }}{% endblock %} 

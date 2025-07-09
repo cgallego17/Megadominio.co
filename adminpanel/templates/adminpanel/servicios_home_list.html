@@ -1,0 +1,604 @@
+{% extends 'adminpanel/dashboard.html' %}
+{% load static %}
+
+{% block title %}Servicios del Home - Panel Admin | Megadominio{% endblock %}
+
+{% block dashboard_active %}{% endblock %}
+{% block servicios_home_active %}active{% endblock %}
+
+{% block page_header %}
+<header class="page-header">
+    <div>
+        <h1><i class="fas fa-home"></i> Servicios del Home</h1>
+        <p>Gestiona los servicios principales que aparecen en la página de inicio</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'adminpanel:servicios_vendibles_list' %}" class="btn btn-primary">
+            <i class="fas fa-shopping-cart"></i> Ver Servicios Vendibles
+        </a>
+    </div>
+</header>
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-container">
+            <!-- Estadísticas -->
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ servicios.count }}</div>
+                            <div class="stat-label">Total Servicios</div>
+                        </div>
+                        <div class="stat-icon primary">
+                            <i class="fas fa-home"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ servicios_con_imagen.count }}</div>
+                            <div class="stat-label">Con Imagen</div>
+                        </div>
+                        <div class="stat-icon success">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ servicios_con_precio.count }}</div>
+                            <div class="stat-label">Con Precio</div>
+                        </div>
+                        <div class="stat-icon warning">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ total_servicios_vendibles }}</div>
+                            <div class="stat-label">Servicios Vendibles</div>
+                        </div>
+                        <div class="stat-icon info">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información -->
+            <div class="modern-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-info-circle"></i> Información</h3>
+                </div>
+                <div class="card-body">
+                    <p>Estos son los servicios principales que aparecen en la página de inicio. Cada servicio puede tener múltiples "servicios vendibles" asociados que son los productos específicos que los clientes pueden comprar.</p>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="modern-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-filter"></i> Filtros</h3>
+                </div>
+                <div class="card-body">
+                    <form method="GET" class="filter-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="search">Buscar</label>
+                                <input type="text" name="search" id="search" class="form-input" 
+                                       value="{{ current_search|default:'' }}" placeholder="Nombre o descripción...">
+                            </div>
+                            <div class="form-group">
+                                <label for="has_image">Con Imagen</label>
+                                <select name="has_image" id="has_image" class="form-input">
+                                    <option value="">Todos</option>
+                                    <option value="true" {% if current_has_image == "true" %}selected{% endif %}>Con imagen</option>
+                                    <option value="false" {% if current_has_image == "false" %}selected{% endif %}>Sin imagen</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="has_price">Con Precio</label>
+                                <select name="has_price" id="has_price" class="form-input">
+                                    <option value="">Todos</option>
+                                    <option value="true" {% if current_has_price == "true" %}selected{% endif %}>Con precio</option>
+                                    <option value="false" {% if current_has_price == "false" %}selected{% endif %}>Sin precio</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="has_vendibles">Con Servicios Vendibles</label>
+                                <select name="has_vendibles" id="has_vendibles" class="form-input">
+                                    <option value="">Todos</option>
+                                    <option value="true" {% if current_has_vendibles == "true" %}selected{% endif %}>Con servicios vendibles</option>
+                                    <option value="false" {% if current_has_vendibles == "false" %}selected{% endif %}>Sin servicios vendibles</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i> Filtrar
+                                    </button>
+                                    <a href="{% url 'adminpanel:servicios_home_list' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Limpiar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista de Servicios -->
+            <div class="modern-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> Servicios del Home ({{ servicios.count }})</h3>
+                </div>
+                <div class="card-body">
+                    {% if servicios %}
+                        <div class="services-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-cube"></i> Servicio</th>
+                                        <th><i class="fas fa-image"></i> Imagen/Icono</th>
+                                        <th><i class="fas fa-dollar-sign"></i> Precio</th>
+                                        <th><i class="fas fa-shopping-cart"></i> Servicios Vendibles</th>
+                                        <th><i class="fas fa-calendar"></i> Fecha</th>
+                                        <th><i class="fas fa-cogs"></i> Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for servicio in servicios %}
+                                        <tr>
+                                            <td>
+                                                <div class="service-info">
+                                                    <h4>{{ servicio.nombre }}</h4>
+                                                    <p>{{ servicio.descripcion|truncatechars:80 }}</p>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="service-icon">
+                                                    {% if servicio.imagen %}
+                                                        <img src="{{ servicio.imagen.url }}" alt="{{ servicio.nombre }}" class="service-image">
+                                                    {% else %}
+                                                        <i class="{{ servicio.icono }}"></i>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {% if servicio.precio %}
+                                                    <span class="price-tag">{{ servicio.precio }}</span>
+                                                {% else %}
+                                                    <span class="no-price">Sin precio</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="vendibles-info">
+                                                    <span class="vendibles-count">{{ servicio.total_purchasable }}</span>
+                                                    <span class="vendibles-label">servicios vendibles</span>
+                                                    {% if servicio.total_purchasable > 0 %}
+                                                        <a href="{% url 'adminpanel:servicios_vendibles_list' %}?home_service={{ servicio.id }}" 
+                                                           class="view-vendibles">
+                                                            <i class="fas fa-eye"></i> Ver
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="date">
+                                                    <div class="day">{{ servicio.created_at|date:"d"|default:"--" }}</div>
+                                                    <div class="month">{{ servicio.created_at|date:"M"|default:"--" }}</div>
+                                                    <div class="year">{{ servicio.created_at|date:"Y"|default:"--" }}</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="actions">
+                                                    <a href="{% url 'adminpanel:servicio_edit' servicio.id %}" 
+                                                       class="btn btn-small btn-primary" title="Editar">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'adminpanel:servicio_delete' servicio.id %}" 
+                                                       class="btn btn-small btn-danger" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-home"></i>
+                            <h3>No hay servicios del home</h3>
+                            <p>Los servicios del home se gestionan desde el Django Admin</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Cómo funciona -->
+            <div class="modern-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-question-circle"></i> ¿Cómo funciona?</h3>
+                </div>
+                <div class="card-body">
+                    <div class="how-it-works">
+                        <div class="work-item">
+                            <div class="work-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="work-content">
+                                <h4>Servicios del Home</h4>
+                                <p>Son los servicios principales que aparecen en la página de inicio (ej: "Desarrollo Web", "Hosting", "Dominios").</p>
+                            </div>
+                        </div>
+                        <div class="work-item">
+                            <div class="work-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="work-content">
+                                <h4>Servicios Vendibles</h4>
+                                <p>Son los productos específicos que los clientes pueden comprar, asociados a cada servicio del home (ej: "Sitio Web Corporativo", "Ecommerce", "Hosting Básico").</p>
+                            </div>
+                        </div>
+                        <div class="work-item">
+                            <div class="work-icon">
+                                <i class="fas fa-sitemap"></i>
+                            </div>
+                            <div class="work-content">
+                                <h4>Estructura</h4>
+                                <p>Cada servicio del home puede tener múltiples servicios vendibles asociados.</p>
+                            </div>
+                        </div>
+                        <div class="work-item">
+                            <div class="work-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="work-content">
+                                <h4>Gestión</h4>
+                                <p>Los servicios del home se gestionan desde el Django Admin, los servicios vendibles desde este panel.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <style>
+        /* Estilos específicos para la tabla de servicios del home */
+        .services-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .services-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--background-card);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .services-table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .services-table th i {
+            margin-right: 8px;
+        }
+
+        .services-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            vertical-align: middle;
+        }
+
+        .services-table tr:hover {
+            background: rgba(255, 102, 0, 0.05);
+        }
+
+        /* Información del servicio */
+        .service-info h4 {
+            color: var(--text-primary);
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .service-info p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        /* Icono/Imagen del servicio */
+        .service-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            background: rgba(255, 102, 0, 0.1);
+        }
+
+        .service-icon i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .service-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        /* Precio */
+        .price-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            background: var(--success-color);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .no-price {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        /* Servicios vendibles */
+        .vendibles-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .vendibles-count {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .vendibles-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .view-vendibles {
+            color: var(--primary-color);
+            font-size: 0.8rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .view-vendibles:hover {
+            color: var(--primary-light);
+        }
+
+        /* Fecha */
+        .date {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .date .day {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .date .month {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .date .year {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Acciones */
+        .actions {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .btn-small {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* Cómo funciona */
+        .how-it-works {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .work-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .work-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .work-icon i {
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .work-content h4 {
+            color: var(--text-primary);
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .work-content p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        /* Tarjetas modernas */
+        .modern-card {
+            background: var(--background-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modern-card .card-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(255, 102, 0, 0.1) 0%, transparent 100%);
+        }
+
+        .modern-card .card-header h3 {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modern-card .card-body {
+            padding: 20px;
+        }
+
+        /* Filtros */
+        .filter-form {
+            margin: 0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-input {
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .services-table {
+                font-size: 0.8rem;
+            }
+            
+            .services-table th,
+            .services-table td {
+                padding: 10px 8px;
+            }
+
+            .how-it-works {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+{% endblock %} 
+{% block extra_js %}{{ block.super }}{% endblock %} 

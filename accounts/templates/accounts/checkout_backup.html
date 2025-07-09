@@ -1,0 +1,436 @@
+{% extends 'accounts/client_base.html' %}
+
+{% block title %}Checkout - Megadominio.co{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="page-title mb-0" style="color: white !important;">Finalizar Compra</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb" style="background-color: #2d2d2d; padding: 10px 15px; border-radius: 8px; margin-top: 10px;">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:client_dashboard' %}" style="color: white;">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:services_catalog' %}" style="color: white;">Catálogo</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:cart' %}" style="color: white;">Carrito</a></li>
+                    <li class="breadcrumb-item active" style="color: #ff8c42;">Checkout</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Pasos del Checkout -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="checkout-steps">
+                <div class="step active">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Revisión</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Información</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Pago</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Confirmación</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" id="checkout-form">
+        {% csrf_token %}
+        <div class="row">
+            <!-- Información de Facturación -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0" style="color: white !important;">
+                            <i class="fas fa-user me-2" style="color: #ff8c42;"></i>
+                            Información de Facturación
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="billing_name" class="form-label" style="color: white !important;">Nombre Completo *</label>
+                                <input type="text" class="form-control" id="billing_name" name="billing_name" 
+                                       value="{{ user.get_full_name }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="billing_email" class="form-label" style="color: white !important;">Email *</label>
+                                <input type="email" class="form-control" id="billing_email" name="billing_email" 
+                                       value="{{ user.email }}" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="billing_phone" class="form-label" style="color: white !important;">Teléfono</label>
+                                <input type="tel" class="form-control" id="billing_phone" name="billing_phone" 
+                                       value="{{ user.phone }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="billing_company" class="form-label" style="color: white !important;">Empresa</label>
+                                <input type="text" class="form-control" id="billing_company" name="billing_company" 
+                                       value="{{ user.company }}">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="billing_address" class="form-label" style="color: white !important;">Dirección *</label>
+                            <textarea class="form-control" id="billing_address" name="billing_address" rows="3" required>{{ user.address }}</textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="billing_city" class="form-label" style="color: white !important;">Ciudad</label>
+                                <input type="text" class="form-control" id="billing_city" name="billing_city" 
+                                       value="{{ user.city }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="billing_country" class="form-label" style="color: white !important;">País</label>
+                                <input type="text" class="form-control" id="billing_country" name="billing_country" 
+                                       value="{{ user.country }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notas Adicionales -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0" style="color: white !important;">
+                            <i class="fas fa-sticky-note me-2" style="color: #ff8c42;"></i>
+                            Notas Adicionales
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" name="notes" rows="4" 
+                                  placeholder="Instrucciones especiales, comentarios o requerimientos adicionales..."></textarea>
+                        <small class="form-text text-muted">Opcional: Cualquier información adicional que consideres importante.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen del Pedido -->
+            <div class="col-lg-4">
+                <div class="card sticky-top">
+                    <div class="card-header">
+                        <h4 class="mb-0" style="color: white !important;">
+                            <i class="fas fa-receipt me-2" style="color: #ff8c42;"></i>
+                            Resumen del Pedido
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Items del Pedido -->
+                        <div class="order-items mb-4">
+                            {% for item in cart_items %}
+                            <div class="order-item mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1" style="color: white !important;">{{ item.service.name }}</h6>
+                                        <small class="text-muted">{{ item.service.category.name }}</small>
+                                        <br>
+                                        <small style="color: #ff8c42 !important;">
+                                            {{ item.get_billing_cycle_display }} × {{ item.quantity }}
+                                        </small>
+                                        {% if item.domain_name %}
+                                            <br><small style="color: #cccccc !important;">
+                                                <i class="fas fa-globe me-1"></i>{{ item.domain_name }}
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-end">
+                                        <span style="color: #ff8c42 !important; font-weight: bold;">
+                                            ${{ item.get_total }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Totales -->
+                        <div class="order-totals">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span style="color: #cccccc !important;">Subtotal:</span>
+                                <span style="color: white !important;">${{ cart_total }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span style="color: #cccccc !important;">Impuestos:</span>
+                                <span style="color: white !important;">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span style="color: #cccccc !important;">Descuentos:</span>
+                                <span style="color: white !important;">$0.00</span>
+                            </div>
+                            <hr style="border-color: #666;">
+                            <div class="d-flex justify-content-between mb-4">
+                                <span style="color: white !important; font-size: 1.2rem; font-weight: bold;">Total:</span>
+                                <span style="color: #ff8c42 !important; font-size: 1.5rem; font-weight: bold;">
+                                    ${{ cart_total }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Método de Pago -->
+                        <div class="payment-method mb-4">
+                            <h6 style="color: white !important;">Método de Pago</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="payment_transfer" value="transfer" checked>
+                                <label class="form-check-label" for="payment_transfer" style="color: #cccccc !important;">
+                                    <i class="fas fa-university me-2"></i>
+                                    Transferencia Bancaria
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="payment_paypal" value="paypal">
+                                <label class="form-check-label" for="payment_paypal" style="color: #cccccc !important;">
+                                    <i class="fab fa-paypal me-2"></i>
+                                    PayPal
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="payment_card" value="card">
+                                <label class="form-check-label" for="payment_card" style="color: #cccccc !important;">
+                                    <i class="fas fa-credit-card me-2"></i>
+                                    Tarjeta de Crédito
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Términos y Condiciones -->
+                        <div class="terms-check mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms_accepted" name="terms_accepted" required>
+                                <label class="form-check-label" for="terms_accepted" style="color: #cccccc !important;">
+                                    Acepto los <a href="#" style="color: #ff8c42 !important;">términos y condiciones</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-lock me-2"></i>
+                                Realizar Pedido
+                            </button>
+                            <a href="{% url 'accounts:cart' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Volver al Carrito
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .checkout-steps {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #2d2d2d;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 20px;
+        position: relative;
+    }
+    
+    .step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 20px;
+        right: -30px;
+        width: 40px;
+        height: 2px;
+        background-color: #666;
+    }
+    
+    .step.active .step-number {
+        background-color: #ff8c42;
+        color: white;
+    }
+    
+    .step.active .step-title {
+        color: #ff8c42;
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #666;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .step-title {
+        font-size: 0.9rem;
+        color: #cccccc;
+        font-weight: 500;
+    }
+    
+    .order-item {
+        padding: 15px;
+        background-color: #404040;
+        border-radius: 8px;
+        border-left: 4px solid #ff8c42;
+    }
+    
+    .order-totals {
+        background-color: #404040;
+        padding: 20px;
+        border-radius: 8px;
+        border: 2px solid #ff8c42;
+    }
+    
+    .payment-method {
+        background-color: #404040;
+        padding: 15px;
+        border-radius: 8px;
+    }
+    
+    .form-check-input:checked {
+        background-color: #ff8c42;
+        border-color: #ff8c42;
+    }
+    
+    .sticky-top {
+        top: 20px;
+    }
+    
+    .terms-check {
+        background-color: #404040;
+        padding: 15px;
+        border-radius: 8px;
+        border: 2px solid #ff8c42;
+    }
+    
+    @media (max-width: 768px) {
+        .checkout-steps {
+            flex-direction: column;
+        }
+        
+        .step {
+            margin: 10px 0;
+        }
+        
+        .step:not(:last-child)::after {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('checkout-form');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validar términos y condiciones
+            const termsAccepted = document.getElementById('terms_accepted').checked;
+            if (!termsAccepted) {
+                showMessage('error', 'Debes aceptar los términos y condiciones para continuar.');
+                return;
+            }
+            
+            // Validar campos requeridos
+            const requiredFields = form.querySelectorAll('[required]');
+            let allValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    allValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!allValid) {
+                showMessage('error', 'Por favor, completa todos los campos requeridos.');
+                return;
+            }
+            
+            // Deshabilitar botón de envío
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+            
+            // Enviar formulario
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.text();
+                }
+            })
+            .then(data => {
+                if (data) {
+                    // Si hay errores, mostrar la página con errores
+                    document.open();
+                    document.write(data);
+                    document.close();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('error', 'Error al procesar el pedido. Por favor, inténtalo de nuevo.');
+                
+                // Rehabilitar botón
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-lock me-2"></i>Realizar Pedido';
+            });
+        });
+        
+        // Mostrar mensajes
+        function showMessage(type, message) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const alertHTML = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            const container = document.querySelector('.container-fluid');
+            container.insertAdjacentHTML('afterbegin', alertHTML);
+            
+            // Auto-hide después de 5 segundos
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    });
+</script>
+{% endblock %} 

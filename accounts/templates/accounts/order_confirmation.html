@@ -1,0 +1,319 @@
+{% extends 'accounts/client_base.html' %}
+{% load service_extras %}
+
+{% block title %}Orden Confirmada - Megadominio.co{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="page-title mb-0" style="color: white !important;">¡Orden Confirmada!</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb" style="background-color: #2d2d2d; padding: 10px 15px; border-radius: 8px; margin-top: 10px;">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:client_dashboard' %}" style="color: white;">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:my_orders' %}" style="color: white;">Mis Órdenes</a></li>
+                    <li class="breadcrumb-item active" style="color: #ff8c42;">Orden #{{ order.order_number }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- Indicador de Moneda -->
+    {% if user_currency %}
+    <div class="row mb-4">
+        <div class="col-12">
+            {% show_currency_indicator user_country user_currency %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Confirmación -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card success-card">
+                <div class="card-body text-center py-5">
+                    <div class="success-icon mb-4">
+                        <i class="fas fa-check-circle fa-5x" style="color: #ff8c42;"></i>
+                    </div>
+                    <h2 class="mb-3" style="color: white !important;">¡Gracias por tu pedido!</h2>
+                    <p class="lead mb-4" style="color: #cccccc !important;">
+                        Tu orden <strong style="color: #ff8c42 !important;">#{{ order.order_number }}</strong> ha sido recibida y está siendo procesada.
+                    </p>
+                    <p style="color: #cccccc !important;">
+                        Recibirás un email de confirmación con todos los detalles de tu pedido.
+                        Nuestro equipo se pondrá en contacto contigo pronto para coordinar la implementación de los servicios.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Detalles de la Orden -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0" style="color: white !important;">
+                        <i class="fas fa-receipt me-2" style="color: #ff8c42;"></i>
+                        Detalles de la Orden
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 style="color: white !important;">Número de Orden</h6>
+                            <p style="color: #ff8c42 !important; font-weight: bold;">#{{ order.order_number }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 style="color: white !important;">Fecha</h6>
+                            <p style="color: #cccccc !important;">{{ order.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 style="color: white !important;">Estado</h6>
+                            <span class="badge bg-warning text-dark">{{ order.get_status_display }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 style="color: white !important;">Total</h6>
+                            <p style="color: #ff8c42 !important; font-weight: bold; font-size: 1.2rem;">{{ order.total_formatted }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Items de la Orden -->
+                    <h6 style="color: white !important;">Servicios Contratados</h6>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="color: white !important;">Servicio</th>
+                                    <th style="color: white !important;">Plan</th>
+                                    <th style="color: white !important;">Cantidad</th>
+                                    <th style="color: white !important;">Precio</th>
+                                    <th style="color: white !important;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td>
+                                        <h6 class="mb-0" style="color: white !important;">{{ item.service_name }}</h6>
+                                        {% if item.domain_name %}
+                                            <small style="color: #ff8c42 !important;">
+                                                <i class="fas fa-globe me-1"></i>{{ item.domain_name }}
+                                            </small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-orange" style="background-color: #ff8c42 !important;">
+                                            {{ item.get_billing_cycle_display }}
+                                        </span>
+                                    </td>
+                                    <td style="color: #cccccc !important;">{{ item.quantity }}</td>
+                                    <td style="color: #cccccc !important;">{{ item.unit_formatted }}</td>
+                                    <td style="color: #ff8c42 !important; font-weight: bold;">{{ item.total_formatted }}</td>
+                                </tr>
+                                {% if item.notes %}
+                                <tr>
+                                    <td colspan="5">
+                                        <div class="alert alert-info mb-0" style="background-color: #404040; border-color: #ff8c42;">
+                                            <i class="fas fa-sticky-note me-2"></i>
+                                            <strong>Notas:</strong> {{ item.notes }}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de Facturación -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0" style="color: white !important;">
+                        <i class="fas fa-user me-2" style="color: #ff8c42;"></i>
+                        Información de Facturación
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p style="color: #cccccc !important;">
+                        <strong style="color: white !important;">Nombre:</strong><br>
+                        {{ order.billing_name }}
+                    </p>
+                    <p style="color: #cccccc !important;">
+                        <strong style="color: white !important;">Email:</strong><br>
+                        {{ order.billing_email }}
+                    </p>
+                    <p style="color: #cccccc !important;">
+                        <strong style="color: white !important;">Dirección:</strong><br>
+                        {{ order.billing_address|linebreaks }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Próximos Pasos -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0" style="color: white !important;">
+                        <i class="fas fa-tasks me-2" style="color: #ff8c42;"></i>
+                        Próximos Pasos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker active">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 style="color: white !important;">Orden Recibida</h6>
+                                <p style="color: #cccccc !important;">Tu pedido ha sido confirmado</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 style="color: white !important;">Procesamiento</h6>
+                                <p style="color: #cccccc !important;">Revisión y preparación de servicios</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 style="color: white !important;">Configuración</h6>
+                                <p style="color: #cccccc !important;">Implementación de servicios</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <h6 style="color: white !important;">Activación</h6>
+                                <p style="color: #cccccc !important;">Servicios listos para usar</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 style="color: white !important;">¿Qué deseas hacer ahora?</h5>
+                    <div class="d-flex justify-content-center gap-3 mt-3">
+                        <a href="{% url 'accounts:my_orders' %}" class="btn btn-primary">
+                            <i class="fas fa-list me-2"></i>
+                            Ver Mis Órdenes
+                        </a>
+                        <a href="{% url 'services:home' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-shopping-bag me-2"></i>
+                            Seguir Comprando
+                        </a>
+                        <a href="{% url 'accounts:client_dashboard' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-home me-2"></i>
+                            Ir al Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .success-card {
+        border: 2px solid #ff8c42;
+        background: linear-gradient(135deg, #2d2d2d, #404040);
+    }
+    
+    .success-icon {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #666;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -23px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #666;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+    
+    .timeline-marker.active {
+        background-color: #ff8c42;
+    }
+    
+    .timeline-content h6 {
+        margin-bottom: 5px;
+    }
+    
+    .timeline-content p {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+    
+    .badge.bg-orange {
+        background-color: #ff8c42 !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Confeti de celebración
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simular confeti (opcional)
+        setTimeout(() => {
+            console.log('¡Orden confirmada exitosamente!');
+        }, 1000);
+    });
+</script>
+{% endblock %} 

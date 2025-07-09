@@ -1,0 +1,458 @@
+{% extends 'servicios/public_base.html' %}
+{% load static %}
+
+{% block title %}Carrito de Compras - megadominio.co{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/fresh-start.css' %}">
+<style>
+.cart-body {
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #0f0f23 100%);
+    min-height: 100vh;
+    position: relative;
+    padding-top: 80px;
+    padding-bottom: 80px;
+    overflow-x: hidden;
+}
+
+.cart-body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 102, 0, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 153, 0, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.cart-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 60px;
+    position: relative;
+    z-index: 2;
+}
+
+.cart-header h1 {
+    font-size: 3.2rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin-bottom: 15px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.cart-header p {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+}
+
+.cart-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.cart-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 40px;
+    align-items: start;
+}
+
+.cart-items {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cart-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.cart-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.item-info h3 {
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.item-category {
+    background: rgba(255, 102, 0, 0.2);
+    color: #ff6600;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.item-description {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.item-description p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+    font-style: italic;
+}
+
+.item-details {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    text-align: center;
+    padding: 15px 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.price-value {
+    color: #00ff88;
+    font-weight: 800;
+}
+
+.total-value {
+    color: #ff6600;
+    font-weight: 800;
+}
+
+.cycle-badge {
+    background: rgba(0, 255, 136, 0.15);
+    color: #00ff88;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.quantity-badge {
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffcc33;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.item-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.remove-btn {
+    background: rgba(255, 59, 48, 0.15);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #ff3b30;
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.remove-btn:hover {
+    background: rgba(255, 59, 48, 0.25);
+    color: #ff3b30;
+    transform: translateY(-1px);
+}
+
+.cart-summary {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+
+.summary-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.summary-header h3 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.summary-total {
+    background: rgba(255, 102, 0, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255, 102, 0, 0.2);
+    text-align: center;
+}
+
+.total-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.total-amount {
+    color: #ff6600;
+    font-size: 2rem;
+    font-weight: 900;
+}
+
+.summary-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ff6600 0%, #ff8533 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 15px 25px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #ff8533 0%, #ff6600 100%);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 102, 0, 0.3);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 15px 25px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.cart-empty {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 100px 20px;
+    font-size: 1.2rem;
+}
+
+.cart-empty h3 {
+    color: #ff6600;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    font-weight: 800;
+}
+
+.cart-empty p {
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .cart-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .cart-header h1 {
+        font-size: 2.5rem;
+    }
+    
+    .cart-items,
+    .cart-summary {
+        padding: 20px;
+        border-radius: 16px;
+    }
+    
+    .item-details {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .summary-actions {
+        gap: 10px;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        padding: 14px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .total-amount {
+        font-size: 1.8rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-body">
+    <section class="cart-header">
+        <h1>🛒 Carrito de Compras</h1>
+        <p>Revisa tus servicios antes de finalizar la compra</p>
+    </section>
+    
+    <div class="container cart-container">
+        {% if cart_items %}
+        <div class="cart-grid">
+            <div class="cart-items">
+                {% for item in cart_items %}
+                <div class="cart-item">
+                    <div class="item-header">
+                        <div class="item-info">
+                            <h3>{{ item.service.name }}</h3>
+                            <span class="item-category">{{ item.service.home_service.nombre }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="item-description">
+                        <p>{{ item.service.home_service.descripcion_corta|default:item.service.home_service.descripcion|truncatewords:20 }}</p>
+                    </div>
+                    
+                    <div class="item-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Ciclo</div>
+                            <div class="detail-value cycle-badge">{{ item.billing_cycle|title }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Precio</div>
+                            <div class="detail-value price-value">{{ item.unit_price_formatted }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Cantidad</div>
+                            <div class="detail-value quantity-badge">{{ item.quantity }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Total</div>
+                            <div class="detail-value total-value">{{ item.total_formatted }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="item-actions">
+                        <form method="post" action="{% url 'services:remove_from_cart' %}" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="item_id" value="{{ item.id }}">
+                            <button type="submit" class="btn remove-btn">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="cart-summary">
+                <div class="summary-header">
+                    <h3>Resumen de Compra</h3>
+                </div>
+                
+                <div class="summary-total">
+                    <div class="total-label">Total a Pagar</div>
+                    <div class="total-amount">{{ cart_total_formatted }}</div>
+                </div>
+                
+                <div class="summary-actions">
+                    <a href="{% url 'services:home' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Seguir Comprando
+                    </a>
+                    <a href="{% url 'services:checkout' %}" class="btn btn-primary">
+                        <i class="fas fa-credit-card"></i> Finalizar Compra
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="cart-empty">
+            <h3>🛒 Tu carrito está vacío</h3>
+            <p>Agrega algunos servicios increíbles para comenzar tu proyecto</p>
+            <a href="{% url 'services:home' %}" class="btn btn-primary">
+                <i class="fas fa-shopping-cart"></i> Ver Servicios
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

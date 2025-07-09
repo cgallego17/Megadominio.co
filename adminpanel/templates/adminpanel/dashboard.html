@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | megadominio.co</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/admin-panel.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="admin-dashboard">
+    <!-- Overlay para móviles -->
+    <div class="sidebar-overlay" onclick="closeMobileMenu()"></div>
+    
+    <!-- Menú lateral moderno -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-rocket"></i> Megadominio</h2>
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'adminpanel:admin_dashboard' %}" class="{% block dashboard_active %}active{% endblock %}" onclick="closeMobileMenu()"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="{% url 'servicios:home' %}" onclick="closeMobileMenu()"><i class="fas fa-globe"></i> <span>Página de Inicio</span></a></li>
+            <li><a href="{% url 'adminpanel:analytics' %}" class="{% block analytics_active %}{% endblock %}" onclick="closeMobileMenu()"><i class="fas fa-chart-line"></i> <span>Analytics</span></a></li>
+            <li><a href="{% url 'adminpanel:servicios_home_list' %}" class="{% block servicios_home_active %}{% endblock %}" onclick="closeMobileMenu()"><i class="fas fa-home"></i> <span>Servicios del Home</span></a></li>
+            <li><a href="{% url 'adminpanel:servicios_vendibles_list' %}" class="{% block servicios_vendibles_active %}{% endblock %}" onclick="closeMobileMenu()"><i class="fas fa-shopping-cart"></i> <span>Servicios Vendibles</span></a></li>
+            <li><a href="{% url 'adminpanel:clientes_list' %}" class="{% block clientes_active %}{% endblock %}" onclick="closeMobileMenu()"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+            <li><a href="{% url 'adminpanel:ventas_list' %}" class="{% block ventas_active %}{% endblock %}" onclick="closeMobileMenu()"><i class="fas fa-dollar-sign"></i> <span>Ventas</span></a></li>
+            <li><a href="{% url 'adminpanel:contactos_list' %}" class="{% block contactos_active %}{% endblock %}" onclick="closeMobileMenu()"><i class="fas fa-envelope"></i> <span>Contactos</span></a></li>
+            <li><a href="{% url 'adminpanel:admin_logout' %}" onclick="closeMobileMenu()"><i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span></a></li>
+        </ul>
+    </nav>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+        {% block page_header %}
+        <header class="page-header">
+            <div>
+                <div class="mobile-menu-container">
+                    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1><i class="fas fa-chart-pie"></i> Centro de Gestión</h1>
+                </div>
+                <p>Panel de control empresarial - Resumen ejecutivo</p>
+            </div>
+            <div class="header-info">
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="7">7 días</button>
+                    <button class="period-btn" data-period="30">30 días</button>
+                    <button class="period-btn" data-period="90">90 días</button>
+                </div>
+            </div>
+        </header>
+        {% endblock %}
+        
+        {% block content %}
+        <div class="dashboard-container">
+            <!-- Métricas principales -->
+            <div class="metrics-section">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-bar"></i> Métricas Clave
+                </h2>
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-number" data-target="{{ total_servicios }}">0</div>
+                                <div class="stat-label">Servicios del Home</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-home"></i> Página principal
+                                </div>
+                            </div>
+                            <div class="stat-icon primary">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card warning">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-number" data-target="{{ servicios_vendibles_activos }}">0</div>
+                                <div class="stat-label">Servicios a Vender</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-shopping-cart"></i> {{ total_servicios_vendibles }} total
+                                </div>
+                            </div>
+                            <div class="stat-icon warning">
+                                <i class="fas fa-store"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card success">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-number" data-target="{{ visitas_hoy|add:15 }}">0</div>
+                                <div class="stat-label">Visitas Hoy</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-eye"></i> {{ visitantes_unicos_hoy }} únicos
+                                </div>
+                            </div>
+                            <div class="stat-icon success">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card info">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-number" data-target="{{ total_contactos }}">0</div>
+                                <div class="stat-label">Total Clientes</div>
+                                <div class="stat-change {% if contactos_nuevos > 0 %}positive{% else %}neutral{% endif %}">
+                                    <i class="fas fa-envelope"></i> {{ contactos_nuevos }} nuevos
+                                </div>
+                            </div>
+                            <div class="stat-icon info">
+                                <i class="fas fa-handshake"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card purple">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-number" data-target="{{ stats_geo.total_paises }}">0</div>
+                                <div class="stat-label">Países Alcanzados</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-globe"></i> Internacional
+                                </div>
+                            </div>
+                            <div class="stat-icon purple">
+                                <i class="fas fa-globe-americas"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección de servicios vendibles -->
+            <div class="services-section">
+                <h2 class="section-title">
+                    <i class="fas fa-shopping-cart"></i> Servicios a Vender
+                </h2>
+                <div class="services-grid">
+                    <!-- Servicios vendibles destacados -->
+                    <div class="services-card featured-services">
+                        <div class="card-header">
+                            <h3><i class="fas fa-star"></i> Servicios Destacados</h3>
+                            <div class="header-actions">
+                                <span class="services-count">{{ servicios_vendibles_destacados.count }} destacados</span>
+                                <a href="{% url 'adminpanel:servicios_vendibles_list' %}" class="view-all-link">Ver todos</a>
+                            </div>
+                        </div>
+                        <div class="featured-services-container">
+                            {% for servicio in servicios_vendibles_destacados %}
+                            <div class="featured-service-item">
+                                <div class="service-info">
+                                    <div class="service-badge">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="service-details">
+                                        <div class="service-name">{{ servicio.name }}</div>
+                                        <div class="service-category">{{ servicio.home_service.nombre }}</div>
+                                        <div class="service-pricing">
+                                            {% if servicio.price_monthly %}
+                                                <span class="price-tag">Desde ${{ servicio.price_monthly }}/mes</span>
+                                            {% elif servicio.price_annual %}
+                                                <span class="price-tag">Desde ${{ servicio.price_annual }}/año</span>
+                                            {% elif servicio.price_one_time %}
+                                                <span class="price-tag">${{ servicio.price_one_time }} único</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="service-actions">
+                                    <a href="{% url 'adminpanel:servicio_vendible_edit' servicio.id %}" 
+                                       class="action-btn edit" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-state">
+                                <i class="fas fa-star"></i>
+                                <h4>No hay servicios destacados</h4>
+                                <p>Marca servicios como destacados para mostrarlos aquí</p>
+                                <a href="{% url 'adminpanel:servicios_vendibles_list' %}" class="btn-primary">
+                                    Gestionar Servicios
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Acciones rápidas para servicios -->
+                    <div class="services-card quick-actions">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bolt"></i> Acciones Rápidas</h3>
+                        </div>
+                        <div class="service-actions-container">
+                            <a href="{% url 'adminpanel:servicio_vendible_create' %}" class="service-action create">
+                                <div class="action-icon">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="action-content">
+                                    <span class="action-title">Nuevo Servicio</span>
+                                    <span class="action-subtitle">Agregar al catálogo</span>
+                                </div>
+                            </a>
+                            
+                            <a href="{% url 'adminpanel:servicios_vendibles_list' %}" class="service-action manage">
+                                <div class="action-icon">
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                                <div class="action-content">
+                                    <span class="action-title">Gestionar Servicios</span>
+                                    <span class="action-subtitle">{{ total_servicios_vendibles }} servicios</span>
+                                </div>
+                            </a>
+                            
+                            <a href="{% url 'adminpanel:servicios_home_list' %}" class="service-action categories">
+                                <div class="action-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="action-content">
+                                    <span class="action-title">Servicios del Home</span>
+                                    <span class="action-subtitle">Gestionar servicios principales</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección de rendimiento -->
+            <div class="performance-section">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-area"></i> Rendimiento y Análisis
+                </h2>
+                <div class="performance-grid">
+                    <!-- Servicios más consultados -->
+                    <div class="performance-card services-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-star"></i> Servicios Más Consultados</h3>
+                            <span class="card-badge">Esta semana</span>
+                        </div>
+                        <div class="services-list">
+                            {% for servicio in servicios_populares %}
+                            <div class="service-item">
+                                <div class="service-info">
+                                    <div class="service-icon">
+                                        <i class="{{ servicio.icono }}"></i>
+                                    </div>
+                                    <div class="service-details">
+                                        <div class="service-name">{{ servicio.nombre }}</div>
+                                        <div class="service-queries">{{ servicio.consultas }} consultas</div>
+                                    </div>
+                                </div>
+                                <div class="service-trend">
+                                    <i class="fas fa-trending-up"></i>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="services-footer">
+                            <a href="{% url 'adminpanel:analytics' %}" class="services-link">
+                                <i class="fas fa-chart-bar"></i> Ver análisis completo
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de tendencia -->
+                    <div class="performance-card chart-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-chart-line"></i> Tendencia de Visitas</h3>
+                            <span class="card-badge">Últimos 7 días</span>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-wrapper">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                            <div class="chart-stats">
+                                <div class="chart-stat">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <span class="stat-label">Promedio diario</span>
+                                        <span class="stat-value">{{ visitas_hoy|add:15 }} visitas</span>
+                                    </div>
+                                </div>
+                                <div class="chart-stat">
+                                    <div class="stat-icon success">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <span class="stat-label">Crecimiento</span>
+                                        <span class="stat-value positive">+12%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Resumen ejecutivo adicional -->
+                <div class="executive-summary">
+                    <div class="summary-card primary">
+                        <div class="summary-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h4>Estado del Negocio</h4>
+                            <p>{{ total_servicios }} servicios activos generando {{ total_contactos }} leads totales</p>
+                        </div>
+                    </div>
+                    <div class="summary-card success">
+                        <div class="summary-icon">
+                            <i class="fas fa-globe-americas"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h4>Alcance Internacional</h4>
+                            <p>Presencia en {{ stats_geo.total_paises }} países con crecimiento sostenido</p>
+                        </div>
+                    </div>
+                    <div class="summary-card info">
+                        <div class="summary-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h4>Engagement</h4>
+                            <p>{{ visitantes_unicos_hoy }} visitantes únicos hoy con alta retención</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección de gestión -->
+            <div class="management-section">
+                <h2 class="section-title">
+                    <i class="fas fa-tasks"></i> Gestión y Actividad
+                </h2>
+                <div class="management-grid">
+                    <!-- Contactos recientes -->
+                    <div class="management-card contacts-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-inbox"></i> Contactos Recientes</h3>
+                            <div class="header-actions">
+                                {% if contactos_nuevos > 0 %}
+                                <span class="urgent-badge">{{ contactos_nuevos }} pendientes</span>
+                                {% endif %}
+                                <a href="{% url 'adminpanel:contactos_list' %}" class="view-all-link">Ver todos</a>
+                            </div>
+                        </div>
+                        <div class="contacts-container">
+                            {% for contacto in contactos_recientes %}
+                            <div class="contact-item {% if not contacto.atendido %}pending{% endif %}">
+                                <div class="contact-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="contact-info">
+                                    <div class="contact-name">{{ contacto.nombre }}</div>
+                                    <div class="contact-service">
+                                        <i class="fas fa-star"></i> {{ contacto.servicio_interes }}
+                                    </div>
+                                    <div class="contact-date">
+                                        <i class="fas fa-clock"></i> {{ contacto.fecha_contacto|date:"d/m H:i" }}
+                                    </div>
+                                </div>
+                                <div class="contact-status">
+                                    {% if contacto.atendido %}
+                                        <span class="status-badge attended">
+                                            <i class="fas fa-check"></i> Atendido
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge pending">
+                                            <i class="fas fa-clock"></i> Pendiente
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <h4>No hay contactos recientes</h4>
+                                <p>Los nuevos contactos aparecerán aquí</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if contactos_recientes %}
+                        <div class="card-footer">
+                            <div class="contacts-summary">
+                                <span class="summary-item">
+                                    <i class="fas fa-envelope"></i> {{ contactos_recientes.count }} recientes
+                                </span>
+                                <span class="summary-item">
+                                    <i class="fas fa-clock"></i> {{ contactos_nuevos }} pendientes
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Alcance geográfico -->
+                    <div class="management-card geography-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-globe-americas"></i> Alcance Internacional</h3>
+                            <div class="header-actions">
+                                <span class="countries-count">{{ stats_geo.total_paises }} países</span>
+                                <a href="{% url 'adminpanel:analytics' %}" class="view-all-link">Analytics completo</a>
+                            </div>
+                        </div>
+                        <div class="countries-container">
+                            {% for pais in paises_top %}
+                            <div class="country-item">
+                                <div class="country-info">
+                                    <div class="country-flag">🌐</div>
+                                    <div class="country-details">
+                                        <div class="country-name">{{ pais.pais }}</div>
+                                        <div class="country-visits">{{ pais.visitas }} visitas</div>
+                                    </div>
+                                </div>
+                                <div class="country-metrics">
+                                    <div class="country-percentage">{{ pais.porcentaje|floatformat:1 }}%</div>
+                                    <div class="country-progress">
+                                        <div class="progress-bar" style="width: {{ pais.porcentaje }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-state">
+                                <i class="fas fa-globe"></i>
+                                <h4>Datos geográficos en proceso</h4>
+                                <p>Los datos de visitantes aparecerán aquí</p>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if stats_geo.total_paises > 5 %}
+                            <div class="more-countries">
+                                <a href="{% url 'adminpanel:analytics' %}" class="more-link">
+                                    <i class="fas fa-plus"></i> Ver {{ stats_geo.total_paises|add:"-5" }} países más
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% if paises_top %}
+                        <div class="card-footer">
+                            <div class="geography-summary">
+                                <span class="summary-item">
+                                    <i class="fas fa-map-marked-alt"></i> {{ stats_geo.total_paises }} países únicos
+                                </span>
+                                <span class="summary-item">
+                                    <i class="fas fa-city"></i> {{ stats_geo.total_ciudades }} ciudades
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Acciones rápidas mejoradas -->
+                    <div class="management-card actions-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bolt"></i> Acciones Rápidas</h3>
+                            <span class="actions-count">Centro de control</span>
+                        </div>
+                        <div class="quick-actions-container">
+                            <a href="{% url 'adminpanel:analytics' %}" class="quick-action analytics">
+                                <div class="action-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="action-content">
+                                    <span class="action-title">Analytics</span>
+                                    <span class="action-subtitle">Análisis completo</span>
+                                </div>
+                            </a>
+                            
+                            <a href="{% url 'adminpanel:servicio_create' %}" class="quick-action create">
+                                <div class="action-icon">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="action-content">
+                                    <span class="action-title">Nuevo Servicio</span>
+                                    <span class="action-subtitle">Agregar al catálogo</span>
+                                </div>
+                            </a>
+                            
+                            {% if contactos_nuevos > 0 %}
+                            <a href="{% url 'adminpanel:contactos_list' %}" class="quick-action contacts urgent">
+                                <div class="action-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="action-content">
+                                    <span class="action-title">{{ contactos_nuevos }} Pendientes</span>
+                                    <span class="action-subtitle">Requieren atención</span>
+                                </div>
+                            </a>
+                            {% else %}
+                            <a href="{% url 'adminpanel:contactos_list' %}" class="quick-action contacts">
+                                <div class="action-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="action-content">
+                                    <span class="action-title">Contactos</span>
+                                    <span class="action-subtitle">Gestionar clientes</span>
+                                </div>
+                            </a>
+                            {% endif %}
+                            
+                            <a href="{% url 'adminpanel:servicios_list' %}" class="quick-action services">
+                                <div class="action-icon">
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                                <div class="action-content">
+                                    <span class="action-title">Servicios</span>
+                                    <span class="action-subtitle">{{ total_servicios }} activos</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endblock %}
+    </main>
+
+    {% block extra_js %}
+    <script>
+        // Toggle sidebar
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        }
+        
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+        
+        // Close mobile menu
+        function closeMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+        
+        // Datos para gráfico
+        const chartData = {
+            fechas: {{ chart_data.fechas|safe|default:"[]" }},
+            visitas: {{ chart_data.visitas|safe|default:"[]" }}
+        };
+        
+        // Gráfico de tendencia
+        const trendCtx = document.getElementById('trendChart');
+        if (trendCtx && chartData.fechas && chartData.visitas) {
+            const trendChart = new Chart(trendCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: chartData.fechas,
+                    datasets: [{
+                        label: 'Visitas',
+                        data: chartData.visitas,
+                        borderColor: '#ff6600',
+                        backgroundColor: 'rgba(255, 102, 0, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#ff6600',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#888'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#888'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Animación de números
+        function animateNumbers() {
+            document.querySelectorAll('.stat-number').forEach(element => {
+                const target = parseInt(element.getAttribute('data-target'));
+                if (target) {
+                    const duration = 1000;
+                    const start = 0;
+                    const increment = target / (duration / 16);
+                    let current = start;
+                    
+                    const updateNumber = () => {
+                        current += increment;
+                        if (current >= target) {
+                            element.textContent = target.toLocaleString();
+                            return;
+                        }
+                        element.textContent = Math.floor(current).toLocaleString();
+                        requestAnimationFrame(updateNumber);
+                    };
+                    
+                    updateNumber();
+                }
+            });
+        }
+        
+        // Inicializar animaciones
+        document.addEventListener('DOMContentLoaded', function() {
+            animateNumbers();
+        });
+        
+        // Selectores de período
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                // Aquí puedes agregar lógica para cambiar el período
+            });
+        });
+    </script>
+    {% endblock %}
+    
+    <style>
+        /* Estilos adicionales para el dashboard reorganizado */
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-title i {
+            color: var(--primary-color);
+        }
+        
+        .metrics-section {
+            background: linear-gradient(135deg, var(--background-card) 0%, rgba(255, 102, 0, 0.02) 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .performance-section {
+            background: var(--background-card);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .performance-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .performance-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+        
+        .card-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .services-card {
+            min-height: 320px;
+        }
+        
+        .services-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .service-item:hover {
+            background: rgba(255, 102, 0, 0.1);
+            border-color: rgba(255, 102, 0, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .service-icon {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .service-details {
+            flex: 1;
+        }
+        
+        .service-name {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+        }
+        
+        .service-queries {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        
+        .service-trend {
+            color: var(--success-color);
+            font-size: 1.1rem;
+        }
+        
+        .services-footer {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+        }
+        
+        .services-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, rgba(255, 102, 0, 0.1), rgba(255, 102, 0, 0.05));
+            border: 1px solid rgba(255, 102, 0, 0.3);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .services-link:hover {
+            background: linear-gradient(135deg, rgba(255, 102, 0, 0.2), rgba(255, 102, 0, 0.1));
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }
+        
+        .chart-wrapper {
+            height: 200px;
+            margin-bottom: 1rem;
+        }
+        
+        .chart-stats {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
+            border-radius: 0 0 15px 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .chart-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stat-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        .stat-icon.success {
+            background: linear-gradient(135deg, var(--success-color), #28a745);
+        }
+        
+        .stat-content {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.1rem;
+        }
+        
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .stat-value.positive {
+            color: var(--success-color);
+        }
+        
+        /* Resumen ejecutivo */
+        .executive-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .summary-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .summary-card.primary {
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .summary-card.success {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .summary-card.info {
+            border-left: 4px solid var(--info-color);
+        }
+        
+        .summary-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .summary-card.primary .summary-icon {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        }
+        
+        .summary-card.success .summary-icon {
+            background: linear-gradient(135deg, var(--success-color), #28a745);
+        }
+        
+        .summary-card.info .summary-icon {
+            background: linear-gradient(135deg, var(--info-color), #17a2b8);
+        }
+        
+        .summary-content h4 {
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 0 0.3rem 0;
+        }
+        
+        .summary-content p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .management-section {
+            background: var(--background-card);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .management-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 400px;
+            gap: 2rem;
+        }
+        
+        .management-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .management-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .urgent-badge {
+            background: linear-gradient(135deg, var(--danger-color), #e74c3c);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+        
+        .countries-count {
+            background: linear-gradient(135deg, var(--info-color), #17a2b8);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .actions-count {
+            background: linear-gradient(135deg, var(--success-color), #28a745);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .view-all-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .view-all-link:hover {
+            color: var(--primary-light);
+        }
+        
+        /* Contactos */
+        .contacts-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .contact-item:hover {
+            background: rgba(255, 102, 0, 0.08);
+            border-color: rgba(255, 102, 0, 0.2);
+        }
+        
+        .contact-item.pending {
+            border-left: 3px solid var(--warning-color);
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.05), rgba(255, 193, 7, 0.02));
+        }
+        
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .contact-info {
+            flex: 1;
+        }
+        
+        .contact-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+            font-size: 0.95rem;
+        }
+        
+        .contact-service {
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            margin-bottom: 0.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .contact-date {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .status-badge.attended {
+            background: linear-gradient(135deg, var(--success-color), #28a745);
+            color: white;
+        }
+        
+        .status-badge.pending {
+            background: linear-gradient(135deg, var(--warning-color), #e0a800);
+            color: white;
+        }
+        
+        /* Países */
+        .countries-container {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        
+        .country-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .country-item:last-child {
+            border-bottom: none;
+        }
+        
+        .country-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .country-flag {
+            font-size: 1.2rem;
+        }
+        
+        .country-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .country-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+        }
+        
+        .country-visits {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        
+        .country-metrics {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.3rem;
+            min-width: 80px;
+        }
+        
+        .country-percentage {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+        
+        .country-progress {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            border-radius: 2px;
+            transition: width 0.8s ease;
+        }
+        
+        /* Acciones rápidas mejoradas */
+        .quick-actions-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .quick-action:hover {
+            background: linear-gradient(135deg, rgba(255, 102, 0, 0.1), rgba(255, 102, 0, 0.05));
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .quick-action.urgent {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+            border-color: var(--danger-color);
+        }
+        
+        .quick-action.urgent:hover {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.2), rgba(220, 53, 69, 0.1));
+        }
+        
+        .action-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .quick-action.analytics .action-icon {
+            background: linear-gradient(135deg, var(--info-color), #17a2b8);
+        }
+        
+        .quick-action.create .action-icon {
+            background: linear-gradient(135deg, var(--success-color), #28a745);
+        }
+        
+        .quick-action.contacts .action-icon {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        }
+        
+        .quick-action.contacts.urgent .action-icon {
+            background: linear-gradient(135deg, var(--danger-color), #e74c3c);
+        }
+        
+        .quick-action.services .action-icon {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+        }
+        
+        .action-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        
+        .action-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+        
+        .action-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Card footers */
+        .card-footer {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--glass-border);
+        }
+        
+        .contacts-summary, .geography-summary {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .summary-item i {
+            color: var(--primary-color);
+        }
+        
+        /* Estado vacío */
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+        
+        .empty-state h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .empty-state p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        /* Más países */
+        .more-countries {
+            text-align: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--glass-border);
+        }
+        
+        .more-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, rgba(255, 102, 0, 0.1), rgba(255, 102, 0, 0.05));
+            border: 1px solid rgba(255, 102, 0, 0.3);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .more-link:hover {
+            background: linear-gradient(135deg, rgba(255, 102, 0, 0.2), rgba(255, 102, 0, 0.1));
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        /* Animaciones */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .period-selector {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .period-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .period-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .chart-card {
+            min-height: 320px;
+        }
+        
+        /* Responsive mejorado */
+        @media (max-width: 1024px) {
+            .performance-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .management-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .executive-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .management-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .period-selector {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .performance-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-stats {
+                position: relative;
+                background: var(--background-card);
+                border-radius: 10px;
+                margin-top: 1rem;
+            }
+            
+            .contact-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+            }
+            
+            .contact-info {
+                width: 100%;
+            }
+            
+            .country-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .country-metrics {
+                width: 100%;
+                align-items: flex-start;
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            
+            .country-progress {
+                width: 120px;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .contacts-summary, .geography-summary {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .quick-action {
+                padding: 1.2rem;
+            }
+            
+            .action-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</body>
+</html> 

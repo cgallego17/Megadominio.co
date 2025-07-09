@@ -1,0 +1,1089 @@
+{% extends 'adminpanel/dashboard.html' %}
+{% load static %}
+
+{% block title %}Gestionar Contactos | megadominio.co{% endblock %}
+
+{% block dashboard_active %}{% endblock %}
+{% block contactos_active %}active{% endblock %}
+
+{% block page_header %}
+<header class="page-header">
+    <div>
+        <h1><i class="fas fa-envelope"></i> Gestionar Contactos</h1>
+        <p>Administra y responde a los contactos de clientes</p>
+    </div>
+    <div class="header-info">
+        <div class="breadcrumb">
+            <a href="{% url 'adminpanel:admin_dashboard' %}">Dashboard</a>
+            <span>></span>
+            <span>Contactos</span>
+        </div>
+    </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="message {{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Estadísticas rápidas -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card primary">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ contactos.count }}</div>
+                            <div class="stat-label">Total Contactos</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-envelope"></i> Registro completo
+                            </div>
+                        </div>
+                        <div class="stat-icon primary">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card warning">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ contactos_pendientes.count }}</div>
+                            <div class="stat-label">Pendientes</div>
+                            <div class="stat-change {% if contactos_pendientes.count > 0 %}positive{% else %}neutral{% endif %}">
+                                <i class="fas fa-clock"></i> Requieren atención
+                            </div>
+                        </div>
+                        <div class="stat-icon warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card success">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">{{ contactos_atendidos.count }}</div>
+                            <div class="stat-label">Atendidos</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-check"></i> Completados
+                            </div>
+                        </div>
+                        <div class="stat-icon success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Herramientas de tabla -->
+            <div class="table-tools">
+                <div class="table-filters">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchContacts" placeholder="Buscar contactos..." oninput="filterContacts()">
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterByStatus('all')" data-status="all">
+                            <i class="fas fa-list"></i> Todos
+                        </button>
+                        <button class="filter-btn" onclick="filterByStatus('pending')" data-status="pending">
+                            <i class="fas fa-clock"></i> Pendientes
+                        </button>
+                        <button class="filter-btn" onclick="filterByStatus('completed')" data-status="completed">
+                            <i class="fas fa-check"></i> Atendidos
+                        </button>
+                    </div>
+                </div>
+                <div class="table-actions">
+                    <button class="btn btn-primary" onclick="exportContacts()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <button class="btn btn-success" onclick="markAllAsRead()">
+                        <i class="fas fa-tasks"></i> Marcar Todos
+                    </button>
+                </div>
+            </div>
+            
+            {% if contactos %}
+                <div class="table-container">
+                    <table class="contacts-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTable(0)">
+                                    <i class="fas fa-check-circle"></i> Estado
+                                    <i class="fas fa-sort sort-icon"></i>
+                                </th>
+                                <th class="sortable" onclick="sortTable(1)">
+                                    <i class="fas fa-user"></i> Nombre
+                                    <i class="fas fa-sort sort-icon"></i>
+                                </th>
+                                <th class="sortable" onclick="sortTable(2)">
+                                    <i class="fas fa-envelope"></i> Email
+                                    <i class="fas fa-sort sort-icon"></i>
+                                </th>
+                                <th>
+                                    <i class="fas fa-phone"></i> Teléfono
+                                </th>
+                                <th class="sortable" onclick="sortTable(4)">
+                                    <i class="fas fa-star"></i> Servicio
+                                    <i class="fas fa-sort sort-icon"></i>
+                                </th>
+                                <th>
+                                    <i class="fas fa-comment"></i> Mensaje
+                                </th>
+                                <th class="sortable" onclick="sortTable(6)">
+                                    <i class="fas fa-calendar"></i> Fecha
+                                    <i class="fas fa-sort sort-icon"></i>
+                                </th>
+                                <th>
+                                    <i class="fas fa-cog"></i> Acciones
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="contactsTableBody">
+                            {% for contacto in contactos %}
+                            <tr class="contact-row {% if not contacto.atendido %}pending{% else %}completed{% endif %}" data-status="{% if not contacto.atendido %}pending{% else %}completed{% endif %}">
+                                <td class="status-cell">
+                                    <div class="status-badge {% if contacto.atendido %}completed{% else %}pending{% endif %}">
+                                        <i class="{% if contacto.atendido %}fas fa-check{% else %}fas fa-clock{% endif %}"></i>
+                                        <span>{% if contacto.atendido %}Atendido{% else %}Pendiente{% endif %}</span>
+                                    </div>
+                                </td>
+                                <td class="name-cell">
+                                    <div class="contact-name">{{ contacto.nombre }}</div>
+                                    <div class="contact-priority">
+                                        {% if not contacto.atendido %}
+                                            <span class="priority-high">
+                                                <i class="fas fa-exclamation-circle"></i> Requiere atención
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="email-cell">
+                                    <a href="mailto:{{ contacto.email }}" class="email-link">
+                                        {{ contacto.email }}
+                                    </a>
+                                </td>
+                                <td class="phone-cell">
+                                    {% if contacto.telefono %}
+                                        <a href="tel:{{ contacto.telefono }}" class="phone-link">
+                                            {{ contacto.telefono }}
+                                        </a>
+                                    {% else %}
+                                        <span class="no-data">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="service-cell">
+                                    {% if contacto.servicio_interes %}
+                                        <div class="service-tag">
+                                            <i class="fas fa-star"></i>
+                                            {{ contacto.servicio_interes }}
+                                        </div>
+                                    {% else %}
+                                        <span class="no-data">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="message-cell">
+                                    <div class="message-preview" title="{{ contacto.mensaje }}">
+                                        {{ contacto.mensaje|truncatewords:8 }}
+                                    </div>
+                                    {% if contacto.mensaje|length > 50 %}
+                                        <button class="expand-btn" onclick="toggleMessage(this)">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    {% endif %}
+                                </td>
+                                <td class="date-cell">
+                                    <div class="date-info">
+                                        <div class="date-primary">{{ contacto.fecha_contacto|date:"d/m/Y" }}</div>
+                                        <div class="date-secondary">{{ contacto.fecha_contacto|date:"H:i" }}</div>
+                                    </div>
+                                </td>
+                                <td class="actions-cell">
+                                    <div class="action-buttons">
+                                        {% if not contacto.atendido %}
+                                            <button class="action-btn success" onclick="marcarAtendido({{ contacto.id }})" title="Marcar como atendido">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        {% else %}
+                                            <button class="action-btn completed" disabled title="Ya atendido">
+                                                <i class="fas fa-check-circle"></i>
+                                            </button>
+                                        {% endif %}
+                                        <a href="mailto:{{ contacto.email }}?subject=Re: {{ contacto.servicio_interes|default:'Consulta' }}" class="action-btn primary" title="Responder por email">
+                                            <i class="fas fa-reply"></i>
+                                        </a>
+                                        {% if contacto.telefono %}
+                                            <a href="tel:{{ contacto.telefono }}" class="action-btn info" title="Llamar">
+                                                <i class="fas fa-phone"></i>
+                                            </a>
+                                        {% endif %}
+                                        <button class="action-btn danger" onclick="deleteContact({{ contacto.id }})" title="Eliminar contacto">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Información de la tabla -->
+                <div class="table-footer">
+                    <div class="table-info">
+                        <span id="tableInfo">Mostrando {{ contactos.count }} contactos</span>
+                    </div>
+                    <div class="table-pagination">
+                        <!-- Aquí se puede agregar paginación en el futuro -->
+                        <span class="pagination-info">Total: {{ contactos.count }} registros</span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-envelope-open"></i>
+                    <h3>No hay contactos</h3>
+                    <p>Los formularios de contacto aparecerán aquí cuando los visitantes se pongan en contacto</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+    
+    <script>
+        // Variables globales
+        let currentSort = null;
+        let sortDirection = 'asc';
+        let allContacts = [];
+
+        // Inicializar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTable();
+            updateTableInfo();
+        });
+
+        // Inicializar tabla
+        function initializeTable() {
+            const tbody = document.getElementById('contactsTableBody');
+            if (tbody) {
+                allContacts = Array.from(tbody.querySelectorAll('tr'));
+            }
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+        }
+        
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+        
+        // Close mobile menu
+        function closeMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+
+        // Marcar contacto como atendido
+        function marcarAtendido(contactoId) {
+            if (confirm('¿Marcar este contacto como atendido?')) {
+                fetch(`/panel/contactos/${contactoId}/atender/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al marcar como atendido');
+                });
+            }
+        }
+
+        // Filtrar contactos por texto
+        function filterContacts() {
+            const searchTerm = document.getElementById('searchContacts').value.toLowerCase();
+            const tbody = document.getElementById('contactsTableBody');
+            const rows = tbody.querySelectorAll('tr');
+
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const isVisible = text.includes(searchTerm);
+                
+                row.style.display = isVisible ? '' : 'none';
+                if (isVisible) visibleCount++;
+            });
+
+            updateTableInfo(visibleCount);
+        }
+
+        // Filtrar por estado
+        function filterByStatus(status) {
+            const tbody = document.getElementById('contactsTableBody');
+            const rows = tbody.querySelectorAll('tr');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+
+            // Actualizar botones activos
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.status === status) {
+                    btn.classList.add('active');
+                }
+            });
+
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const rowStatus = row.dataset.status;
+                const isVisible = status === 'all' || rowStatus === status;
+                
+                row.style.display = isVisible ? '' : 'none';
+                if (isVisible) visibleCount++;
+            });
+
+            // Limpiar búsqueda
+            document.getElementById('searchContacts').value = '';
+            updateTableInfo(visibleCount);
+        }
+
+        // Ordenar tabla
+        function sortTable(columnIndex) {
+            const tbody = document.getElementById('contactsTableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const headers = document.querySelectorAll('th.sortable');
+
+            // Determinar dirección de ordenamiento
+            if (currentSort === columnIndex) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortDirection = 'asc';
+                currentSort = columnIndex;
+            }
+
+            // Actualizar iconos de ordenamiento
+            headers.forEach((header, index) => {
+                const sortIcon = header.querySelector('.sort-icon');
+                if (index === columnIndex) {
+                    sortIcon.className = `fas fa-sort-${sortDirection === 'asc' ? 'up' : 'down'} sort-icon`;
+                } else {
+                    sortIcon.className = 'fas fa-sort sort-icon';
+                }
+            });
+
+            // Ordenar filas
+            rows.sort((a, b) => {
+                let aValue = a.cells[columnIndex].textContent.trim();
+                let bValue = b.cells[columnIndex].textContent.trim();
+
+                // Ordenamiento especial para fechas
+                if (columnIndex === 6) {
+                    aValue = new Date(aValue.split(' ')[0].split('/').reverse().join('-'));
+                    bValue = new Date(bValue.split(' ')[0].split('/').reverse().join('-'));
+                }
+
+                // Ordenamiento especial para estado
+                if (columnIndex === 0) {
+                    const statusOrder = { 'Pendiente': 0, 'Atendido': 1 };
+                    aValue = statusOrder[aValue] || 999;
+                    bValue = statusOrder[bValue] || 999;
+                }
+
+                if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+                if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            // Reorganizar DOM
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Expandir/contraer mensaje
+        function toggleMessage(button) {
+            const messagePreview = button.parentElement.querySelector('.message-preview');
+            const isExpanded = button.classList.contains('expanded');
+
+            if (isExpanded) {
+                messagePreview.style.maxHeight = '20px';
+                messagePreview.style.overflow = 'hidden';
+                button.innerHTML = '<i class="fas fa-plus"></i>';
+                button.classList.remove('expanded');
+            } else {
+                messagePreview.style.maxHeight = 'none';
+                messagePreview.style.overflow = 'visible';
+                button.innerHTML = '<i class="fas fa-minus"></i>';
+                button.classList.add('expanded');
+            }
+        }
+
+        // Eliminar contacto
+        function deleteContact(contactoId) {
+            if (confirm('¿Estás seguro de que quieres eliminar este contacto? Esta acción no se puede deshacer.')) {
+                fetch(`/panel/contactos/${contactoId}/eliminar/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar el contacto');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al eliminar el contacto');
+                });
+            }
+        }
+
+        // Marcar todos como leídos
+        function markAllAsRead() {
+            if (confirm('¿Marcar todos los contactos pendientes como atendidos?')) {
+                const pendingRows = document.querySelectorAll('tr[data-status="pending"]');
+                const ids = Array.from(pendingRows).map(row => {
+                    const button = row.querySelector('.action-btn.success');
+                    return button ? button.getAttribute('onclick').match(/\d+/)[0] : null;
+                }).filter(id => id);
+
+                if (ids.length === 0) {
+                    alert('No hay contactos pendientes para marcar');
+                    return;
+                }
+
+                fetch('/panel/contactos/marcar-todos/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ids: ids })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error al marcar contactos');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al procesar la solicitud');
+                });
+            }
+        }
+
+        // Exportar contactos
+        function exportContacts() {
+            const activeFilter = document.querySelector('.filter-btn.active').dataset.status;
+            const searchTerm = document.getElementById('searchContacts').value;
+            
+            let url = '/panel/contactos/exportar/';
+            const params = new URLSearchParams();
+            
+            if (activeFilter !== 'all') {
+                params.append('status', activeFilter);
+            }
+            
+            if (searchTerm) {
+                params.append('search', searchTerm);
+            }
+            
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+            
+            window.open(url, '_blank');
+        }
+
+        // Actualizar información de la tabla
+        function updateTableInfo(visibleCount = null) {
+            const tableInfo = document.getElementById('tableInfo');
+            const totalContacts = allContacts.length;
+            
+            if (visibleCount !== null) {
+                tableInfo.textContent = `Mostrando ${visibleCount} de ${totalContacts} contactos`;
+            } else {
+                tableInfo.textContent = `Mostrando ${totalContacts} contactos`;
+            }
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + F para buscar
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('searchContacts').focus();
+            }
+            
+            // Escape para limpiar filtros
+            if (e.key === 'Escape') {
+                document.getElementById('searchContacts').value = '';
+                filterContacts();
+                filterByStatus('all');
+            }
+        });
+    </script>
+    
+    <style>
+        /* Variables CSS */
+        :root {
+            --primary-color: #ff6600;
+            --primary-light: #ff8533;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #999999;
+            --background-card: #1e1e1e;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Herramientas de tabla */
+        .table-tools {
+            background: var(--background-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .table-filters {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 3rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.6rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 102, 0, 0.1);
+            border-color: var(--primary-color);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #40dd5a);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Contenedor de tabla */
+        .table-container {
+            background: var(--background-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        /* Tabla */
+        .contacts-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .contacts-table thead {
+            background: linear-gradient(135deg, rgba(255, 102, 0, 0.1), rgba(255, 102, 0, 0.05));
+        }
+
+        .contacts-table th {
+            padding: 1rem;
+            text-align: left;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        .contacts-table th.sortable {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .contacts-table th.sortable:hover {
+            background: rgba(255, 102, 0, 0.15);
+        }
+
+        .sort-icon {
+            margin-left: 0.5rem;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+
+        .contacts-table th.sortable:hover .sort-icon {
+            color: var(--primary-color);
+        }
+
+        .contacts-table tbody tr {
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .contacts-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .contacts-table tbody tr.pending {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.05), rgba(255, 193, 7, 0.02));
+            border-left: 3px solid var(--warning-color);
+        }
+
+        .contacts-table td {
+            padding: 1rem;
+            vertical-align: top;
+        }
+
+        /* Celdas específicas */
+        .status-cell {
+            width: 120px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .status-badge.pending {
+            background: linear-gradient(135deg, var(--warning-color), #e0a800);
+            color: white;
+        }
+
+        .status-badge.completed {
+            background: linear-gradient(135deg, var(--success-color), #40dd5a);
+            color: white;
+        }
+
+        .name-cell {
+            min-width: 150px;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+            font-size: 1rem;
+        }
+
+        .contact-priority {
+            font-size: 0.8rem;
+        }
+
+        .priority-high {
+            color: var(--warning-color);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .email-cell {
+            min-width: 200px;
+        }
+
+        .email-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .email-link:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+
+        .phone-cell {
+            width: 130px;
+        }
+
+        .phone-link {
+            color: var(--info-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .phone-link:hover {
+            color: #3bc4db;
+            text-decoration: underline;
+        }
+
+        .service-cell {
+            min-width: 150px;
+        }
+
+        .service-tag {
+            background: rgba(255, 102, 0, 0.1);
+            border: 1px solid rgba(255, 102, 0, 0.3);
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .message-cell {
+            max-width: 250px;
+            position: relative;
+        }
+
+        .message-preview {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            max-height: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .expand-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255, 102, 0, 0.1);
+            border: 1px solid rgba(255, 102, 0, 0.3);
+            border-radius: 5px;
+            padding: 0.2rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.3s ease;
+        }
+
+        .expand-btn:hover {
+            background: rgba(255, 102, 0, 0.2);
+        }
+
+        .date-cell {
+            width: 100px;
+        }
+
+        .date-info {
+            text-align: center;
+        }
+
+        .date-primary {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .date-secondary {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .actions-cell {
+            width: 160px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+        }
+
+        .action-btn.success {
+            background: linear-gradient(135deg, var(--success-color), #40dd5a);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        }
+
+        .action-btn.info {
+            background: linear-gradient(135deg, var(--info-color), #3bc4db);
+        }
+
+        .action-btn.danger {
+            background: linear-gradient(135deg, var(--danger-color), #e74c3c);
+        }
+
+        .action-btn.completed {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .action-btn:not(.completed):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .no-data {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Footer de tabla */
+        .table-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-top: 1px solid var(--glass-border);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Estado vacío mejorado */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+            background: var(--background-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .table-tools {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .table-filters {
+                width: 100%;
+            }
+
+            .filter-buttons {
+                order: -1;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .contacts-table {
+                font-size: 0.8rem;
+            }
+
+            .message-cell {
+                max-width: 150px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .contacts-table {
+                min-width: 900px;
+            }
+
+            .table-tools {
+                padding: 1rem;
+            }
+
+            .filter-buttons {
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+
+            .filter-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .table-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 0.2rem;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .contact-row {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        /* Mejoras de estilos existentes */
+        .contact-pending {
+            border-left: 4px solid var(--warning-color);
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
+        }
+        
+        .stat-card.warning::before {
+            background: linear-gradient(90deg, var(--warning-color), #e0a800);
+        }
+        
+        .stat-icon.warning {
+            background: linear-gradient(135deg, var(--warning-color), #e0a800);
+        }
+    </style>
+{% endblock %}
+
+{% block extra_js %}{{ block.super }}{% endblock %} 
